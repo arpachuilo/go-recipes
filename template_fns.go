@@ -12,9 +12,6 @@ import (
 
 var noAlpha = regexp.MustCompile(`[^0-9,\.]+`)
 var templateFns map[string]any = template.FuncMap{
-	"safeURL": func(u string) template.URL {
-		return template.URL(u)
-	},
 	"splitLines": func(u string) []string {
 		return strings.Split(u, "\n")
 	},
@@ -24,6 +21,7 @@ var templateFns map[string]any = template.FuncMap{
 	"inc": func(i int) int {
 		return i + 1
 	},
+	// used for edit
 	"flattenIngredients": func(ingredients models.IngredientSlice) string {
 		str := ""
 		for _, ingredient := range ingredients {
@@ -31,6 +29,7 @@ var templateFns map[string]any = template.FuncMap{
 		}
 		return str
 	},
+	// used for display
 	"formatIngredients": func(ingredients models.IngredientSlice) []template.HTML {
 		formatted := make([]template.HTML, 0)
 
