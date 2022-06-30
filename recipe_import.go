@@ -21,7 +21,7 @@ func (self Router) ServeRecipeImport() Registration {
 	// read templates dynamically for debug
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
 		"templates/base.html",
-		"templates/import.html",
+		"templates/recipe_import.html",
 	))
 
 	return HandlerRegistration{

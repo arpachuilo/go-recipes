@@ -31,7 +31,7 @@ func (self Router) ServeEditRecipe() Registration {
 	// read templates dynamically for debug
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
 		"templates/base.html",
-		"templates/edit.html",
+		"templates/recipe_edit.html",
 	))
 
 	return HandlerRegistration{

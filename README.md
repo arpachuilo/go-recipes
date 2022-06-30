@@ -16,7 +16,7 @@ Steps to setting up the program.
 
 ### Configuration File
 
-Configuration is done via [https://github.com/spf13/viper](https://github.com/spf13/viper). Can use any filetype viper supports. I'm liking toml.
+Configuration is done via [viper](https://github.com/spf13/viper). Can use any filetype viper supports. I'm liking toml.
 
 Example Config
 

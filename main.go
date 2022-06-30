@@ -150,14 +150,6 @@ func (self Router) Register(r HandlerRegistration) {
 	}
 }
 
-// TODO: Improve static asset cache w/ etags
-// TODO: Look into impromvements to prevent multiple db reads on image serving
-// TODO: Look into using sass
-
-// TODO: Add simple auth mechanism (API keys)
-// TODO: Use viper config
-// - https
-// - auth keys
 type ConfigRateLimiter struct {
 	Limit   int           `mapstructure:"limit"`
 	Burst   int           `mapstructure:"burst"`
@@ -180,6 +172,13 @@ type Config struct {
 	Server   ConfigServer   `mapstructure:"server"`
 	Database ConfigDatabase `mapstructure:"database"`
 }
+
+// TODO: Improve static asset cache w/ etags
+// TODO: Support for list view along side the grid view for search results
+// TODO: Look into impromvements to prevent multiple db reads on image serving
+// TODO: Look into using sass
+// TODO: Add simple auth mechanism (API keys)
+// TODO: Add https setting
 
 func main() {
 	// load config

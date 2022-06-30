@@ -22,7 +22,7 @@ func (self Router) ServeRecipeDisplay() Registration {
 	// read templates dynamically for debug
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
 		"templates/base.html",
-		"templates/recipe.html",
+		"templates/recipe_display.html",
 	))
 
 	return HandlerRegistration{

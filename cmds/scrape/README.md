@@ -2,6 +2,8 @@
 
 Scrape a url for a recipe into sqlite3.
 
+Made possible by [github.com/hhursev/recipe-scrapers](https://github.com/hhursev/recipe-scrapers)
+
 ## Requirements
 
 - python 3.0+

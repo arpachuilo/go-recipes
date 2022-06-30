@@ -23,12 +23,12 @@ func (self Router) ServeSearch() Registration {
 	// read templates dynamically for debug
 	fullTemplate := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
 		"templates/base.html",
-		"templates/search.html",
-		"templates/search_results.html",
+		"templates/recipe_search.html",
+		"templates/recipe_search_results.html",
 	))
 
 	fragTemplate := template.Must(template.New("fragment").Funcs(templateFns).ParseFiles(
-		"templates/search_results.html",
+		"templates/recipe_search_results.html",
 	))
 
 	return HandlerRegistration{
