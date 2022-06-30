@@ -31,7 +31,7 @@ function setTheme(theme) {
 window.setTheme = setTheme;
 window.setThemeMeta = setTheme;
 
-let theme = localStorage.getItem("theme") || "macchiato.css";
+let theme = localStorage.getItem("theme") || "/static/css/themes/macchiato.css";
 let color = localStorage.getItem("theme-base") || "#1e2030;";
 
 setTheme(theme);

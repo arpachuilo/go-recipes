@@ -1,7 +1,6 @@
 import sqlite3
 import sys
 import requests
-# import base64
 from PIL import Image
 from io import BytesIO
 from recipe_scrapers import scrape_me
@@ -41,7 +40,6 @@ if image is not None:
         buffered = BytesIO()
         im.save(buffered, format="webp")
         image = buffered.getvalue()
-        # image = "data:" + resp.headers['content-type'] + ";base64," + base64.b64encode(buffered.getvalue()).decode()
 
 # dump to db
 recipe = (

@@ -3,12 +3,14 @@ package main
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/spf13/viper"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -55,9 +57,9 @@ type HandlerRegistration struct {
 	ErrorHandlerFunc ErrorHandlerFunc
 }
 
-func NewRouter() *Router {
+func NewRouter(conf *Config) *Router {
 	// open db
-	db, err := sql.Open("sqlite3", "./recipes.db")
+	db, err := sql.Open("sqlite3", conf.Database.Path)
 	if err != nil {
 		panic(err)
 	}
@@ -154,24 +156,61 @@ func (self Router) Register(r HandlerRegistration) {
 
 // TODO: Add simple auth mechanism (API keys)
 // TODO: Use viper config
-// - rate limiter
-// - timeouts
-// - address
-// - db file path
 // - https
 // - auth keys
+type ConfigRateLimiter struct {
+	Limit   int           `mapstructure:"limit"`
+	Burst   int           `mapstructure:"burst"`
+	Timeout time.Duration `mapstructure:"timeout"`
+}
+
+type ConfigServer struct {
+	Address      string             `mapstructure:"address"`
+	ReadTimeout  time.Duration      `mapstructure:"read_timeout"`
+	WriteTimeout time.Duration      `mapstructure:"write_timeout"`
+	IdleTimeout  time.Duration      `mapstructure:"idle_timeout"`
+	RateLimit    *ConfigRateLimiter `mapstructure:"rate_limiter"`
+}
+
+type ConfigDatabase struct {
+	Path string `mapstructure:"path"`
+}
+
+type Config struct {
+	Server   ConfigServer   `mapstructure:"server"`
+	Database ConfigDatabase `mapstructure:"database"`
+}
+
 func main() {
-	mux := NewRouter()
+	// load config
+	viper.AddConfigPath(".")
+	viper.SetConfigName("config")
+	err := viper.ReadInConfig()
+	if err != nil {
+		panic(fmt.Errorf("viper.ReadInConfig: %w", err))
+	}
 
-	h := NewLimiter(30, 50, time.Minute*3).Use(mux)
+	conf := &Config{}
+	err = viper.Unmarshal(conf)
+
+	// setup router
+	h := http.Handler(NewRouter(conf))
+
+	// setup server
+	if conf.Server.RateLimit != nil {
+		conf := conf.Server.RateLimit
+		h = NewLimiter(conf.Limit, conf.Burst, conf.Timeout).Use(h)
+	}
+
 	h = handlers.RecoveryHandler()(h)
-
 	s := &http.Server{
-		ReadTimeout:  time.Second * 10,
-		WriteTimeout: time.Second * 15,
-		IdleTimeout:  time.Second * 120,
+		Addr:         conf.Server.Address,
+		ReadTimeout:  conf.Server.ReadTimeout,
+		WriteTimeout: conf.Server.WriteTimeout,
+		IdleTimeout:  conf.Server.IdleTimeout,
 		Handler:      h,
 	}
 
+	// serve
 	log.Fatal(s.ListenAndServe())
 }
