@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../css/spice.css"],
+  "sourcesContent": ["li[onclick=\"strike(this)\"] {\n  cursor: pointer;\n}\n"],
+  "mappings": "AAAA,2BACE",
+  "names": []
+}

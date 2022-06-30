@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../js/spice.js"],
+  "sourcesContent": ["function strike(el) {\n  if (el.style.textDecoration) {\n    el.style.removeProperty(\"text-decoration\");\n  } else {\n    el.style.setProperty(\"text-decoration\", \"line-through\");\n  }\n}\n\nwindow.strike = strike;\n\nif (\"scrollRestoration\" in history) {\n  history.scrollRestoration = \"auto\";\n}\n\nfunction setImageSrc(el, imgID, fallback) {\n  const img = document.getElementById(imgID);\n  const [file] = el.files;\n  if (file) {\n    img.src = URL.createObjectURL(file);\n  } else {\n    img.src = fallback;\n  }\n}\n\nwindow.setImageSrc = setImageSrc;\n"],
+  "mappings": "MAAA,WAAgB,EAAI,CAClB,AAAI,EAAG,MAAM,eACX,EAAG,MAAM,eAAe,iBAAiB,EAEzC,EAAG,MAAM,YAAY,kBAAmB,cAAc,CAE1D,CAEA,OAAO,OAAS,EAEhB,AAAI,qBAAuB,UACzB,SAAQ,kBAAoB,QAG9B,WAAqB,EAAI,EAAO,EAAU,CACxC,GAAM,GAAM,SAAS,eAAe,CAAK,EACnC,CAAC,GAAQ,EAAG,MAClB,AAAI,EACF,EAAI,IAAM,IAAI,gBAAgB,CAAI,EAElC,EAAI,IAAM,CAEd,CAEA,OAAO,YAAc",
+  "names": []
+}

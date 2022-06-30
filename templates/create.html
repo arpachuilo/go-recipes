@@ -1,0 +1,55 @@
+{{ define "title" }}{{ .Title }}{{ end }} {{ define "content" }}
+<h1>Create Recipe</h1>
+
+{{ if ne .Error "" }}
+<span style="color: var(--red)"
+  >There was an error handling your request. ({{ .Error }})</span
+>
+{{ end }}
+
+<form action="/create" method="post" enctype="multipart/form-data">
+  <label for="Title">Title</label>
+  <input id="Title" name="Title" type="text" />
+
+  <label for="Image">Image</label>
+  <div style="display: flex">
+    <img
+      style="max-width: 128px; max-height: 128px; margin-right: 1rem"
+      id="image-upload-preview"
+      src=""
+      alt="upload preview"
+    />
+    <noscript>xPreview available only with javascript</noscript>
+    <input
+      onchange="setImageSrc(this, 'image-upload-preview', '')"
+      id="Image"
+      name="Image"
+      type="file"
+      accept="image/png, image/jpeg, image/webp"
+    />
+  </div>
+
+  <label for="Author">Author</label>
+  <input id="Author" name="Author" type="text" />
+
+  <label for="Calories">Calories</label>
+  <input id="Calories" name="Calories" type="text" />
+
+  <label for="ServingSize">Serving Size</label>
+  <input id="ServingSize" name="ServingSize" type="text" />
+
+  <label for="Yields">Yields</label>
+  <input id="Yields" name="Yields" type="text" />
+
+  <label for="TotalTime">Total Time (Minutes)</label>
+  <input id="TotalTime" name="TotalTime" type="number" />
+
+  <label for="Instructions">Instructions</label>
+  <textarea rows="8" id="Instructions" name="Instructions"></textarea>
+
+  <label for="Ingredients">Ingredients</label>
+  <textarea rows="8" id="Ingredients" name="Ingredients" value=""></textarea>
+
+  <input style="margin-top: 1rem" type="submit" value="Save" />
+</form>
+{{ end }}

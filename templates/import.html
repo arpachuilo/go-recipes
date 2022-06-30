@@ -1,0 +1,25 @@
+{{ define "title" }}{{ .Title }}{{ end }} {{ define "content" }}
+<h1>Import Recipe</h1>
+<form id="import" action="/import" method="post">
+  <div style="display: flex">
+    <input
+      name="url"
+      value=""
+      type="text"
+      required
+      placeholder="enter url to import"
+    />
+    <input type="submit" value="Import" style="margin-left: 0.5rem" />
+  </div>
+  <span
+    >Scraping provided by
+    <a target="_blank" href="https://github.com/hhursev/recipe-scrapers"
+      >github.com/hhursev/recipe-scrapers</a
+    >
+  </span>
+  {{ if ne .Error "" }}
+  <span style="color: var(--red)">There was an error importing your URL</span>
+  {{ end }}
+</form>
+
+{{ end }}

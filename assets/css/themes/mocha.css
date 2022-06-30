@@ -1,0 +1,53 @@
+/* mocha https://github.com/catppuccin/catppuccin/blob/main/docs/style-guide.md */
+:root {
+  /* bg color */
+  --base: #1e1e2e;
+  --crust: #11111b;
+  --mantle: #181825;
+
+  --surface0: #313244;
+  --surface1: #45475a;
+  --surface2: #585b70;
+
+  --overlay0: #6c7086;
+  --overlay1: #7f849c;
+  --overlay2: #9399b2;
+
+  /* typography */
+  --text: #cdd6f4;
+  --subtext0: #a6adc8;
+  --subtext1: #bac2de;
+  --textoverlay1: #7f849c;
+
+  /* colors */
+  --rosewater: #f5e0dc;
+  --flamingo: #f2cdcd;
+  --pink: #f5c2e7;
+  --mauve: #cba6f7;
+  --red: #f38ba8;
+  --maroon: #eba0ac;
+  --peach: #fab387;
+  --yellow: #f9e2af;
+  --green: #a6e3a1;
+  --teal: #94e2d5;
+  --sky: #89dceb;
+  --sapphire: #74c7ec;
+  --blue: #89b4fa;
+  --lavender: #b4befe;
+
+  /* links */
+  --link-same-page: var(--rosewater);
+  --link-same-page-visited: var(--flamingo);
+
+  --link-same-domain: var(--green);
+  --link-same-domain-visited: var(--teal);
+
+  --link-external: var(--maroon);
+  --link-external-visited: var(--red);
+
+  --link-hover: var(--blue);
+
+  /* shapes */
+  --border-radius: 5px;
+  --arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 2'%3E%3Cpath fill='rgba(0,0,0,0.7)' fill-rule='nonzero' d='M1.5 2L3 0H0z'/%3E%3C/svg%3E");
+}

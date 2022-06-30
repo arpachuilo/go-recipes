@@ -1,0 +1,45 @@
+{{ define "title" }}{{ .Title }}{{ end }} {{ define "content" }}
+<h1>{{ .Recipe.Title.String }}</h1>
+<figure class="figure-full">
+  <a style="width: 100%" target="_blank" href="{{ .Recipe.URL.String }}">
+    <img
+      style="background-size: 200%; background-position: center; background-image: url('/images/recipe/{{ .Recipe.ID.Int64 }}');"
+      src="/images/recipe/{{ .Recipe.ID.Int64 }}"
+      alt="{{ .Recipe.Title.String }}"
+    />
+
+    <div style="display: flex; flex-direction: column">
+      {{ if .Recipe.ServingSize.Valid }}
+      <span style="padding-left: 0.5rem"
+        >Serving Size: {{ .Recipe.ServingSize.String }}</span
+      >
+      {{ end }} {{ if .Recipe.Yields.Valid }}
+      <span style="padding-left: 0.5rem"
+        >Yields: {{ .Recipe.Yields.String }}</span
+      >
+      {{ end }} {{ if .Recipe.Calories.Valid }}
+      <span style="padding-left: 0.5rem"
+        >Calories: {{ .Recipe.Calories.String | removeAlpha }}</span
+      >
+      {{ end }} {{ if .Recipe.TotalTime.Valid }}
+      <span style="padding-left: 0.5rem"
+        >Total Time: {{ .Recipe.TotalTime.Int64 }} minutes</span
+      >
+      {{ end }}
+
+      <div style="flex-grow: 1"></div>
+      <figcaption>Author: {{ .Recipe.Author.String }}</figcaption>
+    </div>
+  </a>
+</figure>
+
+<h2>Ingredients</h2>
+{{ range (.Ingredients | formatIngredients) }} {{ . }} {{ end }}
+
+<h2>Instructions</h2>
+{{ range (.Recipe.Instructions.String | splitLines) }}
+<p>{{ . }}</p>
+{{ end }}
+
+<a href="/edit/{{ .Recipe.ID.Int64 }}"><input type="button" value="Edit" /></a>
+{{ end }}

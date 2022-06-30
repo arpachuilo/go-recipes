@@ -1,0 +1,53 @@
+/* frappe https://github.com/catppuccin/catppuccin/blob/main/docs/style-guide.md */
+:root {
+  /* bg color */
+  --base: #303446;
+  --crust: #292c3c;
+  --mantle: #232634;
+
+  --surface0: #414559;
+  --surface1: #51576d;
+  --surface2: #626880;
+
+  --overlay0: #737994;
+  --overlay1: #838ba7;
+  --overlay2: #949cbb;
+
+  /* typography */
+  --text: #c6d0f5;
+  --subtext0: #a5adce;
+  --subtext1: #b5bfe2;
+  --textoverlay1: #838ba7;
+
+  /* colors */
+  --rosewater: #f2d5cf;
+  --flamingo: #eebebe;
+  --pink: #f4b8e4;
+  --mauve: #ca9ee6;
+  --red: #e78284;
+  --maroon: #ea999c;
+  --peach: #ef9f76;
+  --yellow: #e5c890;
+  --green: #a6d189;
+  --teal: #81c8be;
+  --sky: #99d1db;
+  --sapphire: #85c1dc;
+  --blue: #8caaee;
+  --lavender: #babbf1;
+
+  /* links */
+  --link-same-page: var(--rosewater);
+  --link-same-page-visited: var(--flamingo);
+
+  --link-same-domain: var(--green);
+  --link-same-domain-visited: var(--teal);
+
+  --link-external: var(--maroon);
+  --link-external-visited: var(--red);
+
+  --link-hover: var(--blue);
+
+  /* shapes */
+  --border-radius: 5px;
+  --arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 2'%3E%3Cpath fill='rgba(0,0,0,0.7)' fill-rule='nonzero' d='M1.5 2L3 0H0z'/%3E%3C/svg%3E");
+}

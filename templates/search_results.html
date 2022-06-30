@@ -1,0 +1,30 @@
+{{ define "fragment" }} {{ range .Recipes }}
+<figure style="flex-direction: row">
+  <a style="flex-direction:: row; width: 100%;" href="recipe/{{ .ID.Int64 }}">
+    <img
+      style="background-size: 200%; background-position: center; background-image: url('/images/recipe/{{ .ID.Int64 }}');"
+      src="/images/recipe/{{ .ID.Int64 }}"
+      alt="{{ .Title.String }}"
+    />
+
+    <div style="flex-grow: 1"></div>
+    <figcaption>{{ .Title.String }}</figcaption>
+  </a>
+</figure>
+{{ end }}
+<div id="pagination" style="flex-basis: 100%">
+  <nav>
+    <ul>
+      {{ $search := .Search }}{{ $offset := .Offset }} {{ range $i, $o :=
+      .Offsets }}
+      <li>
+        {{ if ne $o $offset }}
+        <a href="/?search={{ $search }}&offset={{ $o }}">{{ inc $i }}</a>
+        {{ else }} {{ inc $i }} {{ end }}
+      </li>
+      {{ end }}
+    </ul>
+  </nav>
+</div>
+
+{{ end }}

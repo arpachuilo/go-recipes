@@ -1,0 +1,110 @@
+{{ define "title" }}{{ .Title }}{{ end }} {{ define "content" }}
+<h1>Edit Recipe</h1>
+
+{{ if ne .Error "" }}
+<span style="color: var(--red)"
+  >There was an error handling your request. ({{ .Error }})</span
+>
+{{ end }}
+
+<form
+  action="/edit/{{ .Recipe.ID.Int64 }}"
+  method="post"
+  enctype="multipart/form-data"
+>
+  <label for="URL">URL</label>
+  <input
+    disabled
+    id="URL"
+    name="URL"
+    value="{{ .Recipe.URL.String }}"
+    type="text"
+  />
+
+  <label for="Title">Title</label>
+  <input
+    id="Title"
+    name="Title"
+    value="{{ .Recipe.Title.String }}"
+    type="text"
+  />
+
+  <label for="Image">Image</label>
+  <div style="display: flex">
+    <img
+      style="max-width: 128px; max-height: 128px; margin-right: 1rem"
+      id="image-upload-preview"
+      src="/images/recipe/{{ .Recipe.ID.Int64 }}"
+      alt="upload preview"
+    />
+    <noscript>xPreview available only with javascript</noscript>
+    <input
+      onchange="setImageSrc(this, 'image-upload-preview', '/images/recipe/{{ .Recipe.ID.Int64 }}')"
+      id="Image"
+      name="Image"
+      type="file"
+      accept="image/png, image/jpeg, image/webp"
+    />
+  </div>
+
+  <label for="Author">Author</label>
+  <input
+    id="Author"
+    name="Author"
+    value="{{ .Recipe.Author.String }}"
+    type="text"
+  />
+
+  <label for="Calories">Calories</label>
+  <input
+    id="Calories"
+    name="Calories"
+    value="{{ .Recipe.Calories.String }}"
+    type="text"
+  />
+
+  <label for="ServingSize">Serving Size</label>
+  <input
+    id="ServingSize"
+    name="ServingSize"
+    value="{{ .Recipe.ServingSize.String }}"
+    type="text"
+  />
+
+  <label for="Yields">Yields</label>
+  <input
+    id="Yields"
+    name="Yields"
+    value="{{ .Recipe.Yields.String }}"
+    type="text"
+  />
+
+  <label for="TotalTime">Total Time (Minutes)</label>
+  <input
+    id="TotalTime"
+    name="TotalTime"
+    value="{{ .Recipe.TotalTime.Int64 }}"
+    type="number"
+  />
+
+  <label for="Instructions">Instructions</label>
+  <textarea rows="8" id="Instructions" name="Instructions">
+{{ .Recipe.Instructions.String }}</textarea
+  >
+
+  <label for="Ingredients">Ingredients</label>
+  <textarea rows="8" id="Ingredients" name="Ingredients" value="">
+{{ .Ingredients | flattenIngredients }}</textarea
+  >
+
+  <input style="margin-top: 1rem" type="submit" value="Save" />
+</form>
+
+<form
+  onsubmit="return confirm('Delete recipe?');"
+  action="/delete/{{ .Recipe.ID.Int64 }}"
+  method="POST"
+>
+  <input style="margin-top: 1rem" type="submit" value="Delete" />
+</form>
+{{ end }}

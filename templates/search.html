@@ -1,0 +1,27 @@
+{{ define "title" }}{{ .Title }}{{ end }} {{ define "content" }}
+<h1>Search Recipes</h1>
+<form id="search" autocomplete="off" action="/" method="get">
+  <div style="display: flex">
+    <input
+      name="search"
+      value="{{ .Search }}"
+      type="search"
+      placeholder="search recipes"
+      autocapitalize="off"
+      role="presentation"
+      autocomplete="off"
+      autocorrect="off"
+      spellcheck="false"
+      hx-get="/"
+      hx-trigger="keyup changed delay:300ms"
+      hx-target="#search-results"
+      hx-push-url="true"
+    />
+    <input type="submit" value="Search" style="margin-left: 0.5rem" />
+  </div>
+</form>
+
+<div id="search-results" style="display: flex; flex-wrap: wrap; width: 100%">
+  {{ template "fragment" . }}
+</div>
+{{ end }}
