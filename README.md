@@ -38,6 +38,7 @@ idle_timeout = "3m"
   hosts = ["example.com"]
 
 [auth]
+magic_link_host = "http://localhost"
 enabled = true
 secret = "super_secret_key"
 verification_expires_after = "15m"
@@ -49,6 +50,7 @@ host = "mailer.example.com"
 port = 25
 username = "a_username"
 password = "a_password"
+from = "user@example.com"
 
 [database]
 path = "./recipes.db"

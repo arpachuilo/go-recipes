@@ -18,6 +18,7 @@ import (
 )
 
 type AuthConfig struct {
+	MagicLinkHost            string        `mapstructure:"magic_link_host"`
 	Enabled                  bool          `mapstructure:"enabled"`
 	Secret                   string        `mapstructure:"secret"`
 	VerificationExpiresAfter time.Duration `mapstructure:"verification_expires_after"`
@@ -27,6 +28,7 @@ type AuthConfig struct {
 }
 
 type Auth struct {
+	magicLinkHost            string
 	enabled                  bool
 	secret                   []byte
 	verificationExpiresAfter time.Duration
@@ -35,7 +37,7 @@ type Auth struct {
 }
 
 func NewAuth(conf AuthConfig) *Auth {
-	return &Auth{conf.Enabled, []byte(conf.Secret), conf.VerificationExpiresAfter, conf.TokenName, conf.TokenExpiresAfter}
+	return &Auth{conf.MagicLinkHost, conf.Enabled, []byte(conf.Secret), conf.VerificationExpiresAfter, conf.TokenName, conf.TokenExpiresAfter}
 }
 
 func (self *Auth) VerifyToken(r *http.Request) bool {
@@ -179,7 +181,7 @@ func (self Router) SendLink() registerable.Registration {
 				}
 
 				data := MagicLinkTemplate{
-					URL:    template.URL(fmt.Sprintf("//%v/verify-link?verification_code=%v", r.Host, verificationCode)),
+					URL:    template.URL(fmt.Sprintf("%v/verify-link?verification_code=%v", self.magicLinkHost, verificationCode)),
 					Expiry: fmt.Sprintf("%s", self.Auth.verificationExpiresAfter),
 				}
 
