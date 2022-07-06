@@ -12,6 +12,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/spf13/viper"
 	"github.com/volatiletech/sqlboiler/v4/boil"
+	"golang.org/x/crypto/acme/autocert"
 
 	_ "github.com/mattn/go-sqlite3"
 
@@ -19,8 +20,7 @@ import (
 )
 
 func redirect(w http.ResponseWriter, r *http.Request) {
-	target := "https://" + r.Host + r.RequestURI
-	http.Redirect(w, r, target, http.StatusMovedPermanently)
+	http.Redirect(w, r, "https://"+r.Host+r.URL.String(), http.StatusMovedPermanently)
 }
 
 type Router struct {
@@ -144,7 +144,7 @@ func (self Router) Register(r HandlerRegistration) {
 		}
 
 		self.Router.
-			HandleFunc(r.Path, r.HandlerFunc).
+			HandleFunc(r.Path, h).
 			Name(r.Name).
 			Methods(r.Methods...)
 	}
@@ -156,7 +156,14 @@ type ConfigRateLimiter struct {
 	Timeout time.Duration `mapstructure:"timeout"`
 }
 
+type ConfigAutocert struct {
+	Email string   `mapstructure:"email"`
+	Hosts []string `mapstructure:"hosts"`
+}
+
 type ConfigServer struct {
+	HTTPS        bool               `mapstructure:"https"`
+	Autocert     ConfigAutocert     `mapstructure:"autocert"`
 	Address      string             `mapstructure:"address"`
 	ReadTimeout  time.Duration      `mapstructure:"read_timeout"`
 	WriteTimeout time.Duration      `mapstructure:"write_timeout"`
@@ -179,6 +186,7 @@ type Config struct {
 // TODO: Look into using sass
 // TODO: Add simple auth mechanism (API keys)
 // TODO: Add https setting
+// TODO: Look into clustering recipe data (assign most relevant emoji maybe even?)
 
 func main() {
 	// load config
@@ -210,6 +218,25 @@ func main() {
 		Handler:      h,
 	}
 
-	// serve
-	log.Fatal(s.ListenAndServe())
+	if conf.Server.HTTPS {
+		// configure certs
+		m := &autocert.Manager{
+			Cache:      autocert.DirCache("secret-dir"),
+			Prompt:     autocert.AcceptTOS,
+			Email:      conf.Server.Autocert.Email,
+			HostPolicy: autocert.HostWhitelist(conf.Server.Autocert.Hosts...),
+		}
+
+		s.TLSConfig = m.TLSConfig()
+
+		// setup redirect
+		go func() {
+			go http.ListenAndServe(":80", http.Handler(http.HandlerFunc(redirect)))
+		}()
+
+		log.Fatal(s.ListenAndServeTLS("", ""))
+	} else {
+
+		log.Fatal(s.ListenAndServe())
+	}
 }
