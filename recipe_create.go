@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/arpachuilo/go-registerable"
 	"github.com/chai2010/webp"
 	"github.com/nfnt/resize"
 	"github.com/volatiletech/null/v8"
@@ -22,17 +23,19 @@ type CreateTemplate struct {
 	Error string
 }
 
-func (self Router) ServeCreateRecipe() Registration {
+func (self Router) ServeCreateRecipe() registerable.Registration {
 	// read templates dynamically for debug
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
 		"templates/base.html",
+		"templates/nav.html",
 		"templates/recipe_create.html",
 	))
 
 	return HandlerRegistration{
-		Name:    "create",
-		Path:    "/create",
-		Methods: []string{"GET"},
+		Name:        "create",
+		Path:        "/create",
+		Methods:     []string{"GET"},
+		RequireAuth: self.Auth.enabled,
 		ErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request) error {
 			// get error if any
 			rq := r.URL.Query()
@@ -136,11 +139,12 @@ func createRecipe(db *sql.DB, r *http.Request) (id int64, err error) {
 	return
 }
 
-func (self Router) CreateRecipe() Registration {
+func (self Router) CreateRecipe() registerable.Registration {
 	return HandlerRegistration{
-		Name:    "create recipe",
-		Path:    "/create",
-		Methods: []string{"POST"},
+		Name:        "create recipe",
+		Path:        "/create",
+		Methods:     []string{"POST"},
+		RequireAuth: self.Auth.enabled,
 		HandlerFunc: func(w http.ResponseWriter, r *http.Request) {
 			id, err := func() (int64, error) {
 				// parse form

@@ -4,6 +4,8 @@ import (
 	"embed"
 	"io/fs"
 	"net/http"
+
+	"github.com/arpachuilo/go-registerable"
 )
 
 //go:embed assets/static
@@ -23,7 +25,7 @@ func NewCachedFileServer(fsys fs.FS) CachedFileServer {
 	return CachedFileServer{httpFS}
 }
 
-func (self Router) ServeStatic() Registration {
+func (self Router) ServeStatic() registerable.Registration {
 	fsys, err := fs.Sub(staticFS, "assets/static")
 	if err != nil {
 		panic(err)

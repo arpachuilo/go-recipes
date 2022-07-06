@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/arpachuilo/go-registerable"
 	"github.com/gorilla/mux"
 	"github.com/volatiletech/null/v8"
 	. "github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -89,13 +90,14 @@ func (self RecipeImageFileServer) ServeHTTP(w http.ResponseWriter, r *http.Reque
 	w.Write(recipe.Image.Bytes)
 }
 
-func (self Router) ServeRecipeImages() Registration {
+func (self Router) ServeRecipeImages() registerable.Registration {
 	imageFS := NewRecipeImageFileServer("images", self.DB, self.ImageETags)
 	return HandlerRegistration{
 		Name:    "images",
 		Path:    "/images/recipe/{id:[0-9]+}",
 		Methods: []string{"GET"},
 
-		Handler: imageFS,
+		RequireAuth: self.Auth.enabled,
+		Handler:     imageFS,
 	}
 }

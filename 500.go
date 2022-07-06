@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"html/template"
 	"net/http"
 )
@@ -19,6 +18,7 @@ func Handle500Middleware(fn ErrorHandlerFunc) http.HandlerFunc {
 	// read templates dynamically for debug
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
 		"templates/base.html",
+		"templates/nav.html",
 		"templates/500.html",
 	))
 
@@ -30,7 +30,6 @@ func Handle500Middleware(fn ErrorHandlerFunc) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		if err := fn(w, r); err != nil {
-			fmt.Println(err)
 			page.WriteTo(w)
 		}
 	}

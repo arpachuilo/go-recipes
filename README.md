@@ -22,14 +22,33 @@ Example Config
 
 ```toml
 [server]
+https = false
 address = ":80"
 read_timeout = "10s"
 write_timeout = "15s"
+idle_timeout = "3m"
 
   [server.rate_limiter]
   limit = 30
   burst = 50
   timeout = "3m"
+
+  [server.autocert]
+  email = "mail@example.com"
+  hosts = ["example.com"]
+
+[auth]
+enabled = true
+secret = "super_secret_key"
+verification_expires_after = "15m"
+token_name = "token_name_for_cookie"
+token_expires_after = "60d"
+
+[mailer]
+host = "mailer.example.com"
+port = 25
+username = "a_username"
+password = "a_password"
 
 [database]
 path = "./recipes.db"

@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"syscall"
 
+	"github.com/arpachuilo/go-registerable"
 	"github.com/volatiletech/null/v8"
 )
 
@@ -17,17 +18,19 @@ type ImportTemplate struct {
 	Error string
 }
 
-func (self Router) ServeRecipeImport() Registration {
+func (self Router) ServeRecipeImport() registerable.Registration {
 	// read templates dynamically for debug
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
 		"templates/base.html",
+		"templates/nav.html",
 		"templates/recipe_import.html",
 	))
 
 	return HandlerRegistration{
-		Name:    "import",
-		Path:    "/import",
-		Methods: []string{"GET"},
+		Name:        "import",
+		Path:        "/import",
+		Methods:     []string{"GET"},
+		RequireAuth: self.Auth.enabled,
 		ErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request) error {
 			rq := r.URL.Query()
 			error := ""
@@ -69,11 +72,12 @@ func scrapeRecipe(db, url string) error {
 	return nil
 }
 
-func (self Router) ImportRecipe() Registration {
+func (self Router) ImportRecipe() registerable.Registration {
 	return HandlerRegistration{
-		Name:    "scrape",
-		Path:    "/import",
-		Methods: []string{"POST"},
+		Name:        "scrape",
+		Path:        "/import",
+		Methods:     []string{"POST"},
+		RequireAuth: self.Auth.enabled,
 		HandlerFunc: func(w http.ResponseWriter, r *http.Request) {
 			id, err := func() (int64, error) {
 				// parse form

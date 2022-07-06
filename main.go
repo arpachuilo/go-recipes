@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/arpachuilo/go-registerable"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/spf13/viper"
@@ -27,6 +28,7 @@ type Router struct {
 	*sql.DB
 	*mux.Router
 	*Auth
+	*Mailer
 
 	ImageETags *ETags[int64]
 }
@@ -65,7 +67,10 @@ func NewRouter(conf *Config) *Router {
 	}
 
 	// open auth
-	auth := NewAuth("supersecret")
+	auth := NewAuth(conf.Auth)
+
+	// open mailer
+	mailer := NewMailer(conf.Mailer, nil)
 
 	// image etags
 	imageEtags := NewETags[int64]()
@@ -84,10 +89,11 @@ func NewRouter(conf *Config) *Router {
 		DB:         db,
 		Router:     mux.NewRouter(),
 		Auth:       auth,
+		Mailer:     mailer,
 		ImageETags: imageEtags,
 	}
 
-	RegisterMethods[HandlerRegistration](r)
+	registerable.RegisterMethods[HandlerRegistration](r)
 
 	return r
 }
@@ -150,42 +156,43 @@ func (self Router) Register(r HandlerRegistration) {
 	}
 }
 
-type ConfigRateLimiter struct {
+type RateLimiterConfig struct {
 	Limit   int           `mapstructure:"limit"`
 	Burst   int           `mapstructure:"burst"`
 	Timeout time.Duration `mapstructure:"timeout"`
 }
 
-type ConfigAutocert struct {
+type AutoCertConfig struct {
 	Email string   `mapstructure:"email"`
 	Hosts []string `mapstructure:"hosts"`
 }
 
-type ConfigServer struct {
+type ServerConfig struct {
 	HTTPS        bool               `mapstructure:"https"`
-	Autocert     ConfigAutocert     `mapstructure:"autocert"`
+	Autocert     AutoCertConfig     `mapstructure:"autocert"`
 	Address      string             `mapstructure:"address"`
 	ReadTimeout  time.Duration      `mapstructure:"read_timeout"`
 	WriteTimeout time.Duration      `mapstructure:"write_timeout"`
 	IdleTimeout  time.Duration      `mapstructure:"idle_timeout"`
-	RateLimit    *ConfigRateLimiter `mapstructure:"rate_limiter"`
+	RateLimit    *RateLimiterConfig `mapstructure:"rate_limiter"`
 }
 
-type ConfigDatabase struct {
+type DatabaseConfig struct {
 	Path string `mapstructure:"path"`
 }
 
 type Config struct {
-	Server   ConfigServer   `mapstructure:"server"`
-	Database ConfigDatabase `mapstructure:"database"`
+	Server   ServerConfig   `mapstructure:"server"`
+	Database DatabaseConfig `mapstructure:"database"`
+	Auth     AuthConfig     `mapstructure:"auth"`
+	Mailer   MailerConfig   `mapstructure:"mailer"`
 }
 
 // TODO: Improve static asset cache w/ etags
 // TODO: Support for list view along side the grid view for search results
 // TODO: Look into impromvements to prevent multiple db reads on image serving
 // TODO: Look into using sass
-// TODO: Add simple auth mechanism (API keys)
-// TODO: Add https setting
+// TODO: Look into template context to set/unset nav
 // TODO: Look into clustering recipe data (assign most relevant emoji maybe even?)
 
 func main() {

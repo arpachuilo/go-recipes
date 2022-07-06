@@ -27,3 +27,8 @@ tmp/
 
 # Go workspace file
 go.work
+
+# configs
+config.toml
+config.yaml
+config.json

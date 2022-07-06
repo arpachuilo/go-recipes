@@ -1,0 +1,15 @@
+{{ define "base" }}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recipes Magic Link</title>
+  </head>
+  <body>
+    Click <a href="{{ .URL }}" target="_blank" rel="noopener">here</a> to login.
+    <br />
+    <em>This link expires in {{ .Expiry }} and can only be used once.</em>
+  </body>
+</html>
+{{ end }}

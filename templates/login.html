@@ -1,0 +1,20 @@
+{{ define "title" }}{{ .Title }}{{ end }} {{ define "content" }}
+
+<h1>Get Magic Link</h1>
+{{ if ne .Error "" }}
+<span style="color: var(--red)"
+  >There was an error handling your request. ({{ .Error }})</span
+>
+{{ end }}
+
+<form
+  action="/send-link"
+  method="post"
+  enctype="application/x-www-form-urlencoded"
+>
+  <label for="email">Email</label>
+  <input id="email" name="email" type="email" />
+
+  <input style="margin-top: 1rem" type="submit" value="Email Magic Link" />
+</form>
+{{ end }}

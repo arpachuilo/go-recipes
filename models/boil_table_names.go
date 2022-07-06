@@ -6,7 +6,9 @@ package models
 var TableNames = struct {
 	Ingredients string
 	Recipes     string
+	Users       string
 }{
 	Ingredients: "ingredients",
 	Recipes:     "recipes",
+	Users:       "users",
 }

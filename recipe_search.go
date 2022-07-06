@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/arpachuilo/go-registerable"
 	. "github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
@@ -19,10 +20,11 @@ type SearchTemplate struct {
 	Offsets []int
 }
 
-func (self Router) ServeSearch() Registration {
+func (self Router) ServeSearch() registerable.Registration {
 	// read templates dynamically for debug
 	fullTemplate := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
 		"templates/base.html",
+		"templates/nav.html",
 		"templates/recipe_search.html",
 		"templates/recipe_search_results.html",
 	))
@@ -32,9 +34,10 @@ func (self Router) ServeSearch() Registration {
 	))
 
 	return HandlerRegistration{
-		Name:    "search",
-		Path:    "/",
-		Methods: []string{"GET"},
+		Name:        "search",
+		Path:        "/",
+		Methods:     []string{"GET"},
+		RequireAuth: self.Auth.enabled,
 		ErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request) error {
 			rq := r.URL.Query()
 			// get search if any

@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"html/template"
 	"net/http"
+
+	"github.com/arpachuilo/go-registerable"
 )
 
 type FourOhFourHandler struct {
@@ -25,7 +27,7 @@ func (self FourOhFourHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	self.Page.WriteTo(w)
 }
 
-func (self Router) Serve404() Registration {
+func (self Router) Serve404() registerable.Registration {
 	data := struct {
 		Title string
 	}{
@@ -35,6 +37,7 @@ func (self Router) Serve404() Registration {
 	// read templates dynamically for debug
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
 		"templates/base.html",
+		"templates/nav.html",
 		"templates/404.html",
 	))
 

@@ -14,56 +14,67 @@ import "testing"
 func TestParent(t *testing.T) {
 	t.Run("Ingredients", testIngredients)
 	t.Run("Recipes", testRecipes)
+	t.Run("Users", testUsers)
 }
 
 func TestDelete(t *testing.T) {
 	t.Run("Ingredients", testIngredientsDelete)
 	t.Run("Recipes", testRecipesDelete)
+	t.Run("Users", testUsersDelete)
 }
 
 func TestQueryDeleteAll(t *testing.T) {
 	t.Run("Ingredients", testIngredientsQueryDeleteAll)
 	t.Run("Recipes", testRecipesQueryDeleteAll)
+	t.Run("Users", testUsersQueryDeleteAll)
 }
 
 func TestSliceDeleteAll(t *testing.T) {
 	t.Run("Ingredients", testIngredientsSliceDeleteAll)
 	t.Run("Recipes", testRecipesSliceDeleteAll)
+	t.Run("Users", testUsersSliceDeleteAll)
 }
 
 func TestExists(t *testing.T) {
 	t.Run("Ingredients", testIngredientsExists)
 	t.Run("Recipes", testRecipesExists)
+	t.Run("Users", testUsersExists)
 }
 
 func TestFind(t *testing.T) {
 	t.Run("Ingredients", testIngredientsFind)
 	t.Run("Recipes", testRecipesFind)
+	t.Run("Users", testUsersFind)
 }
 
 func TestBind(t *testing.T) {
 	t.Run("Ingredients", testIngredientsBind)
 	t.Run("Recipes", testRecipesBind)
+	t.Run("Users", testUsersBind)
 }
 
 func TestOne(t *testing.T) {
 	t.Run("Ingredients", testIngredientsOne)
 	t.Run("Recipes", testRecipesOne)
+	t.Run("Users", testUsersOne)
 }
 
 func TestAll(t *testing.T) {
 	t.Run("Ingredients", testIngredientsAll)
 	t.Run("Recipes", testRecipesAll)
+	t.Run("Users", testUsersAll)
 }
 
 func TestCount(t *testing.T) {
 	t.Run("Ingredients", testIngredientsCount)
 	t.Run("Recipes", testRecipesCount)
+	t.Run("Users", testUsersCount)
 }
 
 func TestHooks(t *testing.T) {
 	t.Run("Ingredients", testIngredientsHooks)
 	t.Run("Recipes", testRecipesHooks)
+	t.Run("Users", testUsersHooks)
 }
 
 func TestInsert(t *testing.T) {
@@ -71,6 +82,8 @@ func TestInsert(t *testing.T) {
 	t.Run("Ingredients", testIngredientsInsertWhitelist)
 	t.Run("Recipes", testRecipesInsert)
 	t.Run("Recipes", testRecipesInsertWhitelist)
+	t.Run("Users", testUsersInsert)
+	t.Run("Users", testUsersInsertWhitelist)
 }
 
 // TestToOne tests cannot be run in parallel
@@ -130,24 +143,29 @@ func TestToManyRemove(t *testing.T) {
 func TestReload(t *testing.T) {
 	t.Run("Ingredients", testIngredientsReload)
 	t.Run("Recipes", testRecipesReload)
+	t.Run("Users", testUsersReload)
 }
 
 func TestReloadAll(t *testing.T) {
 	t.Run("Ingredients", testIngredientsReloadAll)
 	t.Run("Recipes", testRecipesReloadAll)
+	t.Run("Users", testUsersReloadAll)
 }
 
 func TestSelect(t *testing.T) {
 	t.Run("Ingredients", testIngredientsSelect)
 	t.Run("Recipes", testRecipesSelect)
+	t.Run("Users", testUsersSelect)
 }
 
 func TestUpdate(t *testing.T) {
 	t.Run("Ingredients", testIngredientsUpdate)
 	t.Run("Recipes", testRecipesUpdate)
+	t.Run("Users", testUsersUpdate)
 }
 
 func TestSliceUpdateAll(t *testing.T) {
 	t.Run("Ingredients", testIngredientsSliceUpdateAll)
 	t.Run("Recipes", testRecipesSliceUpdateAll)
+	t.Run("Users", testUsersSliceUpdateAll)
 }

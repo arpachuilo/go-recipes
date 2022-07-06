@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/arpachuilo/go-registerable"
 	"github.com/chai2010/webp"
 	"github.com/gorilla/mux"
 	"github.com/nfnt/resize"
@@ -27,17 +28,19 @@ type EditTemplate struct {
 	Ingredients models.IngredientSlice
 }
 
-func (self Router) ServeEditRecipe() Registration {
+func (self Router) ServeEditRecipe() registerable.Registration {
 	// read templates dynamically for debug
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
 		"templates/base.html",
+		"templates/nav.html",
 		"templates/recipe_edit.html",
 	))
 
 	return HandlerRegistration{
-		Name:    "edit",
-		Path:    "/edit/{id:[0-9]+}",
-		Methods: []string{"GET"},
+		Name:        "edit",
+		Path:        "/edit/{id:[0-9]+}",
+		Methods:     []string{"GET"},
+		RequireAuth: self.Auth.enabled,
 		ErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request) error {
 			// get id
 			vars := mux.Vars(r)
@@ -188,11 +191,12 @@ func editRecipe(db *sql.DB, id int64, r *http.Request) (err error) {
 	return nil
 }
 
-func (self Router) EditRecipe() Registration {
+func (self Router) EditRecipe() registerable.Registration {
 	return HandlerRegistration{
-		Name:    "edit recipe",
-		Path:    "/edit/{id:[0-9]+}",
-		Methods: []string{"POST"},
+		Name:        "edit recipe",
+		Path:        "/edit/{id:[0-9]+}",
+		Methods:     []string{"POST"},
+		RequireAuth: self.Auth.enabled,
 		HandlerFunc: func(w http.ResponseWriter, r *http.Request) {
 			// get id
 			vars := mux.Vars(r)

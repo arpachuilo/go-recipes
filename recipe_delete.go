@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/arpachuilo/go-registerable"
 	"github.com/gorilla/mux"
 	"github.com/volatiletech/null/v8"
 )
@@ -48,11 +49,12 @@ func deleteRecipe(db *sql.DB, id int64) (err error) {
 	return nil
 }
 
-func (self Router) DeleteRecipe() Registration {
+func (self Router) DeleteRecipe() registerable.Registration {
 	return HandlerRegistration{
-		Name:    "delete",
-		Path:    "/delete/{id:[0-9]+}",
-		Methods: []string{"POST"}, // work with HTML form standards
+		Name:        "delete",
+		Path:        "/delete/{id:[0-9]+}",
+		Methods:     []string{"POST"}, // work with HTML form standards
+		RequireAuth: self.Auth.enabled,
 		HandlerFunc: func(w http.ResponseWriter, r *http.Request) {
 			// get id
 			vars := mux.Vars(r)

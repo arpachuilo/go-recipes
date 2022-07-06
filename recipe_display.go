@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/arpachuilo/go-registerable"
 	"github.com/gorilla/mux"
 	"github.com/volatiletech/null/v8"
 )
@@ -18,17 +19,19 @@ type RecipeTemplate struct {
 	Ingredients models.IngredientSlice
 }
 
-func (self Router) ServeRecipeDisplay() Registration {
+func (self Router) ServeRecipeDisplay() registerable.Registration {
 	// read templates dynamically for debug
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
 		"templates/base.html",
+		"templates/nav.html",
 		"templates/recipe_display.html",
 	))
 
 	return HandlerRegistration{
-		Name:    "recipe",
-		Path:    "/recipe/{id:[0-9]+}",
-		Methods: []string{"GET"},
+		Name:        "recipe",
+		Path:        "/recipe/{id:[0-9]+}",
+		Methods:     []string{"GET"},
+		RequireAuth: self.Auth.enabled,
 		ErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request) error {
 			// get id
 			vars := mux.Vars(r)
