@@ -48,6 +48,6 @@
   --link-hover: var(--blue);
 
   /* shapes */
-  --border-radius: 5px;
+  --border-radius: 0px;
   --arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 2'%3E%3Cpath fill='rgba(0,0,0,0.7)' fill-rule='nonzero' d='M1.5 2L3 0H0z'/%3E%3C/svg%3E");
 }

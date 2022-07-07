@@ -571,6 +571,83 @@ func testRecipeToManyRecipeidIngredients(t *testing.T) {
 	}
 }
 
+func testRecipeToManyRecipeidTags(t *testing.T) {
+	var err error
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Recipe
+	var b, c Tag
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, recipeDBTypes, true, recipeColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Recipe struct: %s", err)
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = randomize.Struct(seed, &b, tagDBTypes, false, tagColumnsWithDefault...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &c, tagDBTypes, false, tagColumnsWithDefault...); err != nil {
+		t.Fatal(err)
+	}
+
+	queries.Assign(&b.Recipeid, a.ID)
+	queries.Assign(&c.Recipeid, a.ID)
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	check, err := a.RecipeidTags().All(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	bFound, cFound := false, false
+	for _, v := range check {
+		if queries.Equal(v.Recipeid, b.Recipeid) {
+			bFound = true
+		}
+		if queries.Equal(v.Recipeid, c.Recipeid) {
+			cFound = true
+		}
+	}
+
+	if !bFound {
+		t.Error("expected to find b")
+	}
+	if !cFound {
+		t.Error("expected to find c")
+	}
+
+	slice := RecipeSlice{&a}
+	if err = a.L.LoadRecipeidTags(ctx, tx, false, (*[]*Recipe)(&slice), nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.R.RecipeidTags); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
+	}
+
+	a.R.RecipeidTags = nil
+	if err = a.L.LoadRecipeidTags(ctx, tx, true, &a, nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.R.RecipeidTags); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
+	}
+
+	if t.Failed() {
+		t.Logf("%#v", check)
+	}
+}
+
 func testRecipeToManyAddOpRecipeidIngredients(t *testing.T) {
 	var err error
 
@@ -818,6 +895,257 @@ func testRecipeToManyRemoveOpRecipeidIngredients(t *testing.T) {
 		t.Error("relationship to d should have been preserved")
 	}
 	if a.R.RecipeidIngredients[0] != &e {
+		t.Error("relationship to e should have been preserved")
+	}
+}
+
+func testRecipeToManyAddOpRecipeidTags(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Recipe
+	var b, c, d, e Tag
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, recipeDBTypes, false, strmangle.SetComplement(recipePrimaryKeyColumns, recipeColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	foreigners := []*Tag{&b, &c, &d, &e}
+	for _, x := range foreigners {
+		if err = randomize.Struct(seed, x, tagDBTypes, false, strmangle.SetComplement(tagPrimaryKeyColumns, tagColumnsWithoutDefault)...); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	foreignersSplitByInsertion := [][]*Tag{
+		{&b, &c},
+		{&d, &e},
+	}
+
+	for i, x := range foreignersSplitByInsertion {
+		err = a.AddRecipeidTags(ctx, tx, i != 0, x...)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		first := x[0]
+		second := x[1]
+
+		if !queries.Equal(a.ID, first.Recipeid) {
+			t.Error("foreign key was wrong value", a.ID, first.Recipeid)
+		}
+		if !queries.Equal(a.ID, second.Recipeid) {
+			t.Error("foreign key was wrong value", a.ID, second.Recipeid)
+		}
+
+		if first.R.RecipeidRecipe != &a {
+			t.Error("relationship was not added properly to the foreign slice")
+		}
+		if second.R.RecipeidRecipe != &a {
+			t.Error("relationship was not added properly to the foreign slice")
+		}
+
+		if a.R.RecipeidTags[i*2] != first {
+			t.Error("relationship struct slice not set to correct value")
+		}
+		if a.R.RecipeidTags[i*2+1] != second {
+			t.Error("relationship struct slice not set to correct value")
+		}
+
+		count, err := a.RecipeidTags().Count(ctx, tx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if want := int64((i + 1) * 2); count != want {
+			t.Error("want", want, "got", count)
+		}
+	}
+}
+
+func testRecipeToManySetOpRecipeidTags(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Recipe
+	var b, c, d, e Tag
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, recipeDBTypes, false, strmangle.SetComplement(recipePrimaryKeyColumns, recipeColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	foreigners := []*Tag{&b, &c, &d, &e}
+	for _, x := range foreigners {
+		if err = randomize.Struct(seed, x, tagDBTypes, false, strmangle.SetComplement(tagPrimaryKeyColumns, tagColumnsWithoutDefault)...); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	err = a.SetRecipeidTags(ctx, tx, false, &b, &c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	count, err := a.RecipeidTags().Count(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 2 {
+		t.Error("count was wrong:", count)
+	}
+
+	err = a.SetRecipeidTags(ctx, tx, true, &d, &e)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	count, err = a.RecipeidTags().Count(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 2 {
+		t.Error("count was wrong:", count)
+	}
+
+	if !queries.IsValuerNil(b.Recipeid) {
+		t.Error("want b's foreign key value to be nil")
+	}
+	if !queries.IsValuerNil(c.Recipeid) {
+		t.Error("want c's foreign key value to be nil")
+	}
+	if !queries.Equal(a.ID, d.Recipeid) {
+		t.Error("foreign key was wrong value", a.ID, d.Recipeid)
+	}
+	if !queries.Equal(a.ID, e.Recipeid) {
+		t.Error("foreign key was wrong value", a.ID, e.Recipeid)
+	}
+
+	if b.R.RecipeidRecipe != nil {
+		t.Error("relationship was not removed properly from the foreign struct")
+	}
+	if c.R.RecipeidRecipe != nil {
+		t.Error("relationship was not removed properly from the foreign struct")
+	}
+	if d.R.RecipeidRecipe != &a {
+		t.Error("relationship was not added properly to the foreign struct")
+	}
+	if e.R.RecipeidRecipe != &a {
+		t.Error("relationship was not added properly to the foreign struct")
+	}
+
+	if a.R.RecipeidTags[0] != &d {
+		t.Error("relationship struct slice not set to correct value")
+	}
+	if a.R.RecipeidTags[1] != &e {
+		t.Error("relationship struct slice not set to correct value")
+	}
+}
+
+func testRecipeToManyRemoveOpRecipeidTags(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Recipe
+	var b, c, d, e Tag
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, recipeDBTypes, false, strmangle.SetComplement(recipePrimaryKeyColumns, recipeColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	foreigners := []*Tag{&b, &c, &d, &e}
+	for _, x := range foreigners {
+		if err = randomize.Struct(seed, x, tagDBTypes, false, strmangle.SetComplement(tagPrimaryKeyColumns, tagColumnsWithoutDefault)...); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	err = a.AddRecipeidTags(ctx, tx, true, foreigners...)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	count, err := a.RecipeidTags().Count(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 4 {
+		t.Error("count was wrong:", count)
+	}
+
+	err = a.RemoveRecipeidTags(ctx, tx, foreigners[:2]...)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	count, err = a.RecipeidTags().Count(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 2 {
+		t.Error("count was wrong:", count)
+	}
+
+	if !queries.IsValuerNil(b.Recipeid) {
+		t.Error("want b's foreign key value to be nil")
+	}
+	if !queries.IsValuerNil(c.Recipeid) {
+		t.Error("want c's foreign key value to be nil")
+	}
+
+	if b.R.RecipeidRecipe != nil {
+		t.Error("relationship was not removed properly from the foreign struct")
+	}
+	if c.R.RecipeidRecipe != nil {
+		t.Error("relationship was not removed properly from the foreign struct")
+	}
+	if d.R.RecipeidRecipe != &a {
+		t.Error("relationship to a should have been preserved")
+	}
+	if e.R.RecipeidRecipe != &a {
+		t.Error("relationship to a should have been preserved")
+	}
+
+	if len(a.R.RecipeidTags) != 2 {
+		t.Error("should have preserved two relationships")
+	}
+
+	// Removal doesn't do a stable deletion for performance so we have to flip the order
+	if a.R.RecipeidTags[1] != &d {
+		t.Error("relationship to d should have been preserved")
+	}
+	if a.R.RecipeidTags[0] != &e {
 		t.Error("relationship to e should have been preserved")
 	}
 }

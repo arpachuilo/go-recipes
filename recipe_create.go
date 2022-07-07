@@ -135,6 +135,25 @@ func createRecipe(db *sql.DB, r *http.Request) (id int64, err error) {
 		}
 	}
 
+	// insert new tags
+	tagsText := r.Form["Tags"][0]
+	for _, t := range strings.Split(tagsText, ",") {
+		tf := strings.ToLower(strings.TrimSpace(t))
+		if tf == "" {
+			continue
+		}
+
+		tag := models.Tag{
+			Recipeid: recipe.ID,
+			Tag:      null.StringFrom(tf),
+		}
+
+		err = tag.Insert(context.Background(), tx, boil.Infer())
+		if err != nil {
+			return
+		}
+	}
+
 	id = recipe.ID.Int64
 	return
 }

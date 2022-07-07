@@ -28,6 +28,10 @@ cur.execute('''
     create table if not exists ingredients
     (id integer primary key, recipeid int REFERENCES recipes(id), ingredient text)''')
 
+cur.execute('''
+    create table if not exists tags 
+    (id integer primary key, recipeid int REFERENCES recipes(id), tag text)''')
+
 # generate base64 thumbnail
 image = scraper.image()
 if image is not None:

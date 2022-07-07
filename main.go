@@ -194,6 +194,7 @@ type Config struct {
 // TODO: Look into using sass
 // TODO: Look into template context to set/unset nav
 // TODO: Look into clustering recipe data (assign most relevant emoji maybe even?)
+// TODO: Tag system
 
 func main() {
 	// load config

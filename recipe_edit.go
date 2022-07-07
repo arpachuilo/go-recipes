@@ -26,6 +26,7 @@ type EditTemplate struct {
 	Error       string
 	Recipe      *models.Recipe
 	Ingredients models.IngredientSlice
+	Tags        models.TagSlice
 }
 
 func (self Router) ServeEditRecipe() registerable.Registration {
@@ -86,11 +87,22 @@ func (self Router) ServeEditRecipe() registerable.Registration {
 				return err
 			}
 
+			// read tags
+			tagsQuery := models.Tags(
+				models.TagWhere.Recipeid.EQ(null.Int64From(id)),
+			)
+
+			tags, err := tagsQuery.All(ctx, tx)
+			if err != nil {
+				return err
+			}
+
 			data := EditTemplate{
 				Title:       fmt.Sprintf("Edit %v", recipe.Title.String),
 				Error:       error,
 				Recipe:      recipe,
 				Ingredients: ingredients,
+				Tags:        tags,
 			}
 
 			return tmpl.Execute(w, data)
@@ -183,6 +195,34 @@ func editRecipe(db *sql.DB, id int64, r *http.Request) (err error) {
 		}
 
 		err = ingredient.Insert(context.Background(), tx, boil.Infer())
+		if err != nil {
+			return
+		}
+	}
+
+	// delete previous tags
+	tagsDeleteQuery := models.Tags(
+		models.TagWhere.Recipeid.EQ(null.Int64From(id)),
+	)
+
+	if _, err = tagsDeleteQuery.DeleteAll(context.Background(), tx); err != nil {
+		return
+	}
+
+	// insert new ingredients
+	tagsText := r.Form["Tags"][0]
+	for _, t := range strings.Split(tagsText, ",") {
+		tf := strings.ToLower(strings.TrimSpace(t))
+		if tf == "" {
+			continue
+		}
+
+		tag := models.Tag{
+			Recipeid: null.Int64From(id),
+			Tag:      null.StringFrom(tf),
+		}
+
+		err = tag.Insert(context.Background(), tx, boil.Infer())
 		if err != nil {
 			return
 		}

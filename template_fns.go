@@ -21,6 +21,26 @@ var templateFns map[string]any = template.FuncMap{
 	"inc": func(i int) int {
 		return i + 1
 	},
+	"hasTag": func(possible models.Tag, selected []string) bool {
+		for _, s := range selected {
+			if s == possible.Tag.String {
+				return true
+			}
+		}
+
+		return false
+	},
+	// used for edit
+	"flattenTags": func(tags models.TagSlice) string {
+		str := ""
+		for i, tag := range tags {
+			str += tag.Tag.String
+			if i != len(tags)-1 {
+				str += ","
+			}
+		}
+		return str
+	},
 	// used for edit
 	"flattenIngredients": func(ingredients models.IngredientSlice) string {
 		str := ""

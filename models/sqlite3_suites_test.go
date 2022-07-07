@@ -10,5 +10,7 @@ func TestUpsert(t *testing.T) {
 
 	t.Run("Recipes", testRecipesUpsert)
 
+	t.Run("Tags", testTagsUpsert)
+
 	t.Run("Users", testUsersUpsert)
 }

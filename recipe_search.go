@@ -7,17 +7,20 @@ import (
 	"html/template"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/arpachuilo/go-registerable"
 	. "github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type SearchTemplate struct {
-	Title   string
-	Recipes models.RecipeSlice
-	Search  string
-	Offset  int
-	Offsets []int
+	Title        string
+	Recipes      models.RecipeSlice
+	PossibleTags models.TagSlice
+	SelectedTags []string
+	Search       string
+	Offset       int
+	Offsets      []int
 }
 
 func (self Router) ServeSearch() registerable.Registration {
@@ -42,15 +45,19 @@ func (self Router) ServeSearch() registerable.Registration {
 			rq := r.URL.Query()
 			// get search if any
 			search := ""
-			keys, ok := rq["search"]
-			if ok && len(keys) > 0 {
+			if keys, ok := rq["search"]; ok && len(keys) > 0 {
 				search = keys[0]
+			}
+
+			// get tags if any
+			var tags []string
+			if keys, ok := rq["tags"]; ok && len(keys) > 0 {
+				tags = keys
 			}
 
 			// get offset
 			offset := 0
-			keys, ok = rq["offset"]
-			if ok && len(keys) > 0 {
+			if keys, ok := rq["offset"]; ok && len(keys) > 0 {
 				if value, err := strconv.Atoi(keys[0]); err == nil {
 					offset = value
 				}
@@ -58,8 +65,7 @@ func (self Router) ServeSearch() registerable.Registration {
 
 			// get limit
 			limit := 15
-			keys, ok = rq["limit"]
-			if ok && len(keys) > 0 {
+			if keys, ok := rq["limit"]; ok && len(keys) > 0 {
 				if value, err := strconv.Atoi(keys[0]); err == nil {
 					limit = value
 				}
@@ -71,7 +77,7 @@ func (self Router) ServeSearch() registerable.Registration {
 				htmx = value
 			}
 
-			// read recipes
+			// prepare db
 			ctx := context.Background()
 			tx, err := self.DB.BeginTx(ctx, nil)
 			defer tx.Commit()
@@ -81,10 +87,20 @@ func (self Router) ServeSearch() registerable.Registration {
 
 			// get recipes
 			filter := fmt.Sprintf("%%%v%%", search)
+			args := make([]interface{}, 0)
+			for _, t := range tags {
+				args = append(args, t)
+			}
+			where := Where(`
+                                  (title like ? or i.ingredient like ?)
+                                  and (t.tag in (?) or 0 = ?)
+                                `, filter, filter, strings.Join(tags, ","), len(tags))
+
 			query := models.Recipes(
 				Distinct("recipes.id, title, url, instructions, author, total_time, yields, serving_size, calories, image"),
 				LeftOuterJoin("ingredients i on i.recipeid = recipes.id"),
-				Where("title like ? or i.ingredient like ?", filter, filter),
+				LeftOuterJoin("tags t on t.recipeid = recipes.id"),
+				where,
 				OrderBy("title", "recipes.id"),
 				Limit(limit),
 				Offset(offset),
@@ -99,7 +115,8 @@ func (self Router) ServeSearch() registerable.Registration {
 			query = models.Recipes(
 				Distinct("recipes.id"),
 				LeftOuterJoin("ingredients i on i.recipeid = recipes.id"),
-				Where("title like ? or i.ingredient like ?", filter, filter),
+				LeftOuterJoin("tags t on t.recipeid = recipes.id"),
+				where,
 			)
 
 			count, err := query.Count(ctx, tx)
@@ -117,13 +134,25 @@ func (self Router) ServeSearch() registerable.Registration {
 				}
 			}
 
+			// get tags
+			queryTags := models.Tags(
+				Distinct("tag"),
+			)
+
+			possibleTags, err := queryTags.All(ctx, tx)
+			if err != nil {
+				return err
+			}
+
 			// run template
 			data := &SearchTemplate{
-				Title:   fmt.Sprintf("search recipes for %v", search),
-				Search:  search,
-				Recipes: recipes,
-				Offset:  offset,
-				Offsets: offsets,
+				Title:        fmt.Sprintf("search recipes for %v", search),
+				Search:       search,
+				Recipes:      recipes,
+				PossibleTags: possibleTags,
+				SelectedTags: tags,
+				Offset:       offset,
+				Offsets:      offsets,
 			}
 
 			if htmx {

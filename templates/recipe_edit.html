@@ -87,6 +87,15 @@
     type="number"
   />
 
+  <label for="Tags">Tags</label>
+  <input
+    id="Tags"
+    name="Tags"
+    placeholder="comma seperated values"
+    value="{{ .Tags | flattenTags }}"
+    type="text"
+  />
+
   <label for="Instructions">Instructions</label>
   <textarea rows="8" id="Instructions" name="Instructions">
 {{ .Recipe.Instructions.String }}</textarea

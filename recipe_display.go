@@ -17,6 +17,7 @@ type RecipeTemplate struct {
 	Title       string
 	Recipe      *models.Recipe
 	Ingredients models.IngredientSlice
+	Tags        models.TagSlice
 }
 
 func (self Router) ServeRecipeDisplay() registerable.Registration {
@@ -68,11 +69,23 @@ func (self Router) ServeRecipeDisplay() registerable.Registration {
 			if err != nil {
 				return err
 			}
+
+			// read tags
+			tagsQuery := models.Tags(
+				models.TagWhere.Recipeid.EQ(null.Int64From(id)),
+			)
+
+			tags, err := tagsQuery.All(ctx, tx)
+			if err != nil {
+				return err
+			}
+
 			// run template
 			data := &RecipeTemplate{
 				Title:       fmt.Sprintf("%v", recipe.Title.String),
 				Recipe:      recipe,
 				Ingredients: ingredients,
+				Tags:        tags,
 			}
 
 			return tmpl.Execute(w, data)

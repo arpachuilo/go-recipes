@@ -33,6 +33,10 @@
   </a>
 </figure>
 
+{{ if .Tags }}
+<h6>Tags</h6>
+{{ .Tags | flattenTags }} {{ end }}
+
 <h2>Ingredients</h2>
 {{ range (.Ingredients | formatIngredients) }} {{ . }} {{ end }}
 

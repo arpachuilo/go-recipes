@@ -140,13 +140,16 @@ var RecipeWhere = struct {
 // RecipeRels is where relationship names are stored.
 var RecipeRels = struct {
 	RecipeidIngredients string
+	RecipeidTags        string
 }{
 	RecipeidIngredients: "RecipeidIngredients",
+	RecipeidTags:        "RecipeidTags",
 }
 
 // recipeR is where relationships are stored.
 type recipeR struct {
 	RecipeidIngredients IngredientSlice `boil:"RecipeidIngredients" json:"RecipeidIngredients" toml:"RecipeidIngredients" yaml:"RecipeidIngredients"`
+	RecipeidTags        TagSlice        `boil:"RecipeidTags" json:"RecipeidTags" toml:"RecipeidTags" yaml:"RecipeidTags"`
 }
 
 // NewStruct creates a new relationship struct
@@ -457,6 +460,20 @@ func (o *Recipe) RecipeidIngredients(mods ...qm.QueryMod) ingredientQuery {
 	return Ingredients(queryMods...)
 }
 
+// RecipeidTags retrieves all the tag's Tags with an executor via recipeid column.
+func (o *Recipe) RecipeidTags(mods ...qm.QueryMod) tagQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"tags\".\"recipeid\"=?", o.ID),
+	)
+
+	return Tags(queryMods...)
+}
+
 // LoadRecipeidIngredients allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for a 1-M or N-M relationship.
 func (recipeL) LoadRecipeidIngredients(ctx context.Context, e boil.ContextExecutor, singular bool, maybeRecipe interface{}, mods queries.Applicator) error {
@@ -545,6 +562,104 @@ func (recipeL) LoadRecipeidIngredients(ctx context.Context, e boil.ContextExecut
 				local.R.RecipeidIngredients = append(local.R.RecipeidIngredients, foreign)
 				if foreign.R == nil {
 					foreign.R = &ingredientR{}
+				}
+				foreign.R.RecipeidRecipe = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadRecipeidTags allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (recipeL) LoadRecipeidTags(ctx context.Context, e boil.ContextExecutor, singular bool, maybeRecipe interface{}, mods queries.Applicator) error {
+	var slice []*Recipe
+	var object *Recipe
+
+	if singular {
+		object = maybeRecipe.(*Recipe)
+	} else {
+		slice = *maybeRecipe.(*[]*Recipe)
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &recipeR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &recipeR{}
+			}
+
+			for _, a := range args {
+				if queries.Equal(a, obj.ID) {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`tags`),
+		qm.WhereIn(`tags.recipeid in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load tags")
+	}
+
+	var resultSlice []*Tag
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice tags")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on tags")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for tags")
+	}
+
+	if len(tagAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.RecipeidTags = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &tagR{}
+			}
+			foreign.R.RecipeidRecipe = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if queries.Equal(local.ID, foreign.Recipeid) {
+				local.R.RecipeidTags = append(local.R.RecipeidTags, foreign)
+				if foreign.R == nil {
+					foreign.R = &tagR{}
 				}
 				foreign.R.RecipeidRecipe = local
 				break
@@ -675,6 +790,133 @@ func (o *Recipe) RemoveRecipeidIngredients(ctx context.Context, exec boil.Contex
 				o.R.RecipeidIngredients[i] = o.R.RecipeidIngredients[ln-1]
 			}
 			o.R.RecipeidIngredients = o.R.RecipeidIngredients[:ln-1]
+			break
+		}
+	}
+
+	return nil
+}
+
+// AddRecipeidTags adds the given related objects to the existing relationships
+// of the recipe, optionally inserting them as new records.
+// Appends related to o.R.RecipeidTags.
+// Sets related.R.RecipeidRecipe appropriately.
+func (o *Recipe) AddRecipeidTags(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Tag) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			queries.Assign(&rel.Recipeid, o.ID)
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"tags\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 0, []string{"recipeid"}),
+				strmangle.WhereClause("\"", "\"", 0, tagPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			queries.Assign(&rel.Recipeid, o.ID)
+		}
+	}
+
+	if o.R == nil {
+		o.R = &recipeR{
+			RecipeidTags: related,
+		}
+	} else {
+		o.R.RecipeidTags = append(o.R.RecipeidTags, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &tagR{
+				RecipeidRecipe: o,
+			}
+		} else {
+			rel.R.RecipeidRecipe = o
+		}
+	}
+	return nil
+}
+
+// SetRecipeidTags removes all previously related items of the
+// recipe replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.RecipeidRecipe's RecipeidTags accordingly.
+// Replaces o.R.RecipeidTags with related.
+// Sets related.R.RecipeidRecipe's RecipeidTags accordingly.
+func (o *Recipe) SetRecipeidTags(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Tag) error {
+	query := "update \"tags\" set \"recipeid\" = null where \"recipeid\" = ?"
+	values := []interface{}{o.ID}
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, query)
+		fmt.Fprintln(writer, values)
+	}
+	_, err := exec.ExecContext(ctx, query, values...)
+	if err != nil {
+		return errors.Wrap(err, "failed to remove relationships before set")
+	}
+
+	if o.R != nil {
+		for _, rel := range o.R.RecipeidTags {
+			queries.SetScanner(&rel.Recipeid, nil)
+			if rel.R == nil {
+				continue
+			}
+
+			rel.R.RecipeidRecipe = nil
+		}
+		o.R.RecipeidTags = nil
+	}
+
+	return o.AddRecipeidTags(ctx, exec, insert, related...)
+}
+
+// RemoveRecipeidTags relationships from objects passed in.
+// Removes related items from R.RecipeidTags (uses pointer comparison, removal does not keep order)
+// Sets related.R.RecipeidRecipe.
+func (o *Recipe) RemoveRecipeidTags(ctx context.Context, exec boil.ContextExecutor, related ...*Tag) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	for _, rel := range related {
+		queries.SetScanner(&rel.Recipeid, nil)
+		if rel.R != nil {
+			rel.R.RecipeidRecipe = nil
+		}
+		if _, err = rel.Update(ctx, exec, boil.Whitelist("recipeid")); err != nil {
+			return err
+		}
+	}
+	if o.R == nil {
+		return nil
+	}
+
+	for _, rel := range related {
+		for i, ri := range o.R.RecipeidTags {
+			if rel != ri {
+				continue
+			}
+
+			ln := len(o.R.RecipeidTags)
+			if ln > 1 && i < ln-1 {
+				o.R.RecipeidTags[i] = o.R.RecipeidTags[ln-1]
+			}
+			o.R.RecipeidTags = o.R.RecipeidTags[:ln-1]
 			break
 		}
 	}
