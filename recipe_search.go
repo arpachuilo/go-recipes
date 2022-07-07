@@ -87,15 +87,17 @@ func (self Router) ServeSearch() registerable.Registration {
 
 			// get recipes
 			filter := fmt.Sprintf("%%%v%%", search)
-			args := make([]interface{}, 0)
+			args := make([]string, 0)
 			for _, t := range tags {
-				args = append(args, t)
+				args = append(args, fmt.Sprintf("'%v'", t))
 			}
-			where := Where(`
-                                  (title like ? or i.ingredient like ?)
-                                  and (t.tag in (?) or 0 = ?)
-                                `, filter, filter, strings.Join(tags, ","), len(tags))
 
+			whereClause := "(title like ? or i.ingredient like ?)"
+			if len(args) > 0 {
+				whereClause += `and (t.tag in (` + strings.Join(args, ",") + `))`
+			}
+
+			where := Where(whereClause, filter, filter)
 			query := models.Recipes(
 				Distinct("recipes.id, title, url, instructions, author, total_time, yields, serving_size, calories, image"),
 				LeftOuterJoin("ingredients i on i.recipeid = recipes.id"),
