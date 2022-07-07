@@ -41,6 +41,12 @@ if image is not None:
         im.save(buffered, format="webp")
         image = buffered.getvalue()
 
+yields = None
+try:
+    yields = scraper.yields()
+except:
+    yields = None
+
 # dump to db
 recipe = (
         None,
@@ -49,7 +55,7 @@ recipe = (
         scraper.instructions(),
         str(scraper.author()),
         scraper.total_time(),
-        scraper.yields(),
+        yields,
         scraper.nutrients().get('servingSize'),
         scraper.nutrients().get('calories'),
         image,
