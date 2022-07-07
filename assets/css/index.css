@@ -125,6 +125,8 @@ body > header p {
 body > hr {
   margin-top: 0;
   margin-bottom: 0;
+  border-left: 0;
+  border-right: 0;
   border-color: var(--crust);
   width: 100%;
 }
