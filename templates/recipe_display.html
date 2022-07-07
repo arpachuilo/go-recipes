@@ -1,7 +1,13 @@
 {{ define "title" }}{{ .Title }}{{ end }} {{ define "content" }}
 <h1>{{ .Recipe.Title.String }}</h1>
 <figure class="figure-full">
-  <a style="width: 100%" target="_blank" href="{{ .Recipe.URL.String }}">
+  <a
+    style="width: 100%"
+    target="_blank"
+    rel="”noopener"
+    noreferrer”
+    href="{{ .Recipe.URL.String }}"
+  >
     <div style="display: flex; position: relative; z-index: 1">
       <div
         class="blur"
