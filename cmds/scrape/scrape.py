@@ -22,15 +22,15 @@ cur = con.cursor()
 # make tables
 cur.execute('''
     create table if not exists recipes
-    (id integer primary key, url text unique, title text, instructions text, author text, total_time int, yields text, serving_size text, calories text, image blob)''')
+    (id integer primary key autoincrement, url text unique, title text, instructions text, author text, total_time int, yields text, serving_size text, calories text, image blob)''')
 
 cur.execute('''
     create table if not exists ingredients
-    (id integer primary key, recipeid int REFERENCES recipes(id), ingredient text)''')
+    (id integer primary key autoincrement, recipeid int REFERENCES recipes(id), ingredient text)''')
 
 cur.execute('''
     create table if not exists tags 
-    (id integer primary key, recipeid int REFERENCES recipes(id), tag text)''')
+    (id integer primary key autoincrement, recipeid int REFERENCES recipes(id), tag text)''')
 
 # generate base64 thumbnail
 image = scraper.image()
