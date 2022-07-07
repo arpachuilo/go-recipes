@@ -361,7 +361,7 @@ figure.figure-full img {
     flex-direction: row;
   }
 
-  figure.figure-full img {
+  figure.figure-full > a > div:first-child {
     min-width: 35%;
   }
 }
@@ -373,6 +373,10 @@ figcaption {
   margin-left: 0.5em;
   margin-right: 0.5em;
   text-align: center;
+}
+
+figure.figure-full figcaption {
+  text-align: left;
 }
 
 /* FIGURE INTERACTION */

@@ -2,11 +2,17 @@
 <h1>{{ .Recipe.Title.String }}</h1>
 <figure class="figure-full">
   <a style="width: 100%" target="_blank" href="{{ .Recipe.URL.String }}">
-    <img
-      style="background-size: 200%; background-position: center; background-image: url('/images/recipe/{{ .Recipe.ID.Int64 }}');"
-      src="/images/recipe/{{ .Recipe.ID.Int64 }}"
-      alt="{{ .Recipe.Title.String }}"
-    />
+    <div style="display: flex; position: relative; z-index: 1">
+      <div
+        class="blur"
+        style="background-image: url('/images/recipe/{{ .Recipe.ID.Int64 }}');"
+      ></div>
+      <img
+        style="margin: auto"
+        src="/images/recipe/{{ .Recipe.ID.Int64 }}"
+        alt="{{ .Recipe.Title.String }}"
+      />
+    </div>
 
     <div style="display: flex; flex-direction: column">
       {{ if .Recipe.ServingSize.Valid }}
