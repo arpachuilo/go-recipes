@@ -824,3 +824,13 @@ input.chip[type="checkbox"]:checked + label.chip {
 input.chip[type="checkbox"] {
   display: none;
 }
+
+.blur {
+  filter: blur(2px);
+  z-index: -1;
+  min-height: 100%;
+  min-width: 100%;
+  position: absolute;
+  background-size: 200%;
+  background-position: center;
+}
