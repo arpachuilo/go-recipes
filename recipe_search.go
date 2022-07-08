@@ -92,12 +92,12 @@ func (self Router) ServeSearch() registerable.Registration {
 				args = append(args, fmt.Sprintf("'%v'", t))
 			}
 
-			whereClause := "(title like ? or i.ingredient like ?)"
+			whereClause := "(title like ? or i.ingredient like ? or author like ?)"
 			if len(args) > 0 {
 				whereClause += `and (t.tag in (` + strings.Join(args, ",") + `))`
 			}
 
-			where := Where(whereClause, filter, filter)
+			where := Where(whereClause, filter, filter, filter)
 			query := models.Recipes(
 				Distinct("recipes.id, path, title, url, instructions, author, total_time, yields, serving_size, calories, image"),
 				LeftOuterJoin("ingredients i on i.recipeid = recipes.id"),
@@ -106,6 +106,8 @@ func (self Router) ServeSearch() registerable.Registration {
 				OrderBy("title", "recipes.id"),
 				Limit(limit),
 				Offset(offset),
+				GroupBy("recipes.id"),
+				Having("COUNT(DISTINCT t.id) >= ?", len(tags)),
 			)
 
 			recipes, err := query.All(ctx, tx)
@@ -119,6 +121,8 @@ func (self Router) ServeSearch() registerable.Registration {
 				LeftOuterJoin("ingredients i on i.recipeid = recipes.id"),
 				LeftOuterJoin("tags t on t.recipeid = recipes.id"),
 				where,
+				GroupBy("recipes.id"),
+				Having("COUNT(DISTINCT t.id) >= ?", len(tags)),
 			)
 
 			count, err := query.Count(ctx, tx)
