@@ -12,15 +12,6 @@
   method="post"
   enctype="multipart/form-data"
 >
-  <label for="URL">URL</label>
-  <input
-    disabled
-    id="URL"
-    name="URL"
-    value="{{ .Recipe.URL.String }}"
-    type="text"
-  />
-
   <label for="Title">Title</label>
   <input
     id="Title"
@@ -29,17 +20,39 @@
     type="text"
   />
 
+  <label for="URL">URL</label>
+  <input
+    disabled
+    id="URL"
+    name="URL"
+    placeholder="{{ .Recipe.ID.Int64 }}"
+    value="{{ .Recipe.URL.String }}"
+    type="text"
+  />
+
+  <label for="Path">Path</label>
+  <input id="Path" name="Path" value="{{ .Recipe.Path.String }}" type="text" />
+
+  <label for="Tags">Tags</label>
+  <input
+    id="Tags"
+    name="Tags"
+    placeholder="comma seperated values"
+    value="{{ .Tags | flattenTags }}"
+    type="text"
+  />
+
   <label for="Image">Image</label>
   <div style="display: flex">
     <img
       style="max-width: 128px; max-height: 128px; margin-right: 1rem"
       id="image-upload-preview"
-      src="/images/recipe/{{ .Recipe.ID.Int64 }}"
+      src="/images/recipe/{{ .Recipe.Path.String }}"
       alt="upload preview"
     />
     <noscript>xPreview available only with javascript</noscript>
     <input
-      onchange="setImageSrc(this, 'image-upload-preview', '/images/recipe/{{ .Recipe.ID.Int64 }}')"
+      onchange="setImageSrc(this, 'image-upload-preview', '/images/recipe/{{ .Recipe.Path.String }}')"
       id="Image"
       name="Image"
       type="file"
@@ -85,15 +98,6 @@
     name="TotalTime"
     value="{{ .Recipe.TotalTime.Int64 }}"
     type="number"
-  />
-
-  <label for="Tags">Tags</label>
-  <input
-    id="Tags"
-    name="Tags"
-    placeholder="comma seperated values"
-    value="{{ .Tags | flattenTags }}"
-    type="text"
   />
 
   <label for="Instructions">Instructions</label>

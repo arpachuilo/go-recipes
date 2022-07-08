@@ -22,15 +22,30 @@ cur = con.cursor()
 # make tables
 cur.execute('''
     create table if not exists recipes
-    (id integer primary key autoincrement, url text unique, title text, instructions text, author text, total_time int, yields text, serving_size text, calories text, image blob)''')
+    (id integer primary key autoincrement, url text unique, title text, instructions text, author text, total_time int, yields text, serving_size text, calories text, image blob, path text unique)''')
+
+cur.execute('''
+create trigger if not exists idtopath
+after insert on recipes 
+begin
+  update recipes 
+  set path = (
+    case
+      when new.path is not null then new.path
+      else new.id
+    end
+  )
+  where id = new.id;
+end
+''')
 
 cur.execute('''
     create table if not exists ingredients
-    (id integer primary key autoincrement, recipeid int REFERENCES recipes(id), ingredient text)''')
+    (id integer primary key, recipeid int REFERENCES recipes(id), ingredient text)''')
 
 cur.execute('''
     create table if not exists tags 
-    (id integer primary key autoincrement, recipeid int REFERENCES recipes(id), tag text)''')
+    (id integer primary key, recipeid int REFERENCES recipes(id), tag text)''')
 
 # generate base64 thumbnail
 image = scraper.image()
@@ -63,9 +78,10 @@ recipe = (
         scraper.nutrients().get('servingSize'),
         scraper.nutrients().get('calories'),
         image,
+        None,
     )
 
-cur.execute("insert into recipes values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", recipe)
+cur.execute("insert into recipes values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", recipe)
 
 ingredients = map(lambda x: (None, cur.lastrowid, x), scraper.ingredients())
 cur.executemany("insert into ingredients values(?, ?, ?)", ingredients)

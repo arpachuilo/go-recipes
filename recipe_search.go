@@ -99,7 +99,7 @@ func (self Router) ServeSearch() registerable.Registration {
 
 			where := Where(whereClause, filter, filter)
 			query := models.Recipes(
-				Distinct("recipes.id, title, url, instructions, author, total_time, yields, serving_size, calories, image"),
+				Distinct("recipes.id, path, title, url, instructions, author, total_time, yields, serving_size, calories, image"),
 				LeftOuterJoin("ingredients i on i.recipeid = recipes.id"),
 				LeftOuterJoin("tags t on t.recipeid = recipes.id"),
 				where,

@@ -7,7 +7,6 @@ import (
 	"html/template"
 	"net/http"
 	"os/exec"
-	"syscall"
 
 	"github.com/arpachuilo/go-registerable"
 	"github.com/volatiletech/null/v8"
@@ -51,21 +50,9 @@ func (self Router) ServeRecipeImport() registerable.Registration {
 
 func scrapeRecipe(db, url string) error {
 	// scrape URL
-	cmd := exec.Command("python3", "cmds/scrape/scrape.py", db, url)
-	if err := cmd.Start(); err != nil {
-		return err
-	}
-
-	// wait for scraper exit
-	if err := cmd.Wait(); err != nil {
-		if exiterr, ok := err.(*exec.ExitError); ok {
-			if status, ok := exiterr.Sys().(syscall.WaitStatus); ok {
-				return fmt.Errorf("exiterr.Sys: %d", status)
-			}
-		} else {
-			return err
-		}
-
+	out, err := exec.Command("python3", "cmds/scrape/scrape.py", db, url).CombinedOutput()
+	fmt.Println(string(out))
+	if err != nil {
 		return err
 	}
 
@@ -79,21 +66,21 @@ func (self Router) ImportRecipe() registerable.Registration {
 		Methods:     []string{"POST"},
 		RequireAuth: self.Auth.enabled,
 		HandlerFunc: func(w http.ResponseWriter, r *http.Request) {
-			id, err := func() (int64, error) {
+			path, err := func() (string, error) {
 				// parse form
 				if err := r.ParseForm(); err != nil {
-					return -1, err
+					return "", err
 				}
 
 				// get url to import
 				importURL, ok := r.Form["url"]
 				if !ok || len(importURL) == 0 {
-					return -1, fmt.Errorf("%v", "not url provided")
+					return "", fmt.Errorf("%v", "not url provided")
 				}
 
 				// scrape url
 				if err := scrapeRecipe("recipes.db", importURL[0]); err != nil {
-					return -1, err
+					return "", err
 				}
 
 				// read recipe
@@ -101,7 +88,7 @@ func (self Router) ImportRecipe() registerable.Registration {
 				tx, err := self.DB.BeginTx(ctx, nil)
 				defer tx.Commit()
 				if err != nil {
-					return -1, err
+					return "", err
 				}
 
 				query := models.Recipes(
@@ -110,10 +97,10 @@ func (self Router) ImportRecipe() registerable.Registration {
 
 				recipe, err := query.One(ctx, tx)
 				if err != nil {
-					return -1, err
+					return "", err
 				}
 
-				return recipe.ID.Int64, nil
+				return recipe.Path.String, nil
 
 			}()
 			if err != nil {
@@ -122,7 +109,7 @@ func (self Router) ImportRecipe() registerable.Registration {
 				return
 			}
 
-			redirectURL := fmt.Sprintf("/edit/%v", id)
+			redirectURL := fmt.Sprintf("/edit/%v", path)
 			http.Redirect(w, r, redirectURL, http.StatusFound)
 		},
 	}

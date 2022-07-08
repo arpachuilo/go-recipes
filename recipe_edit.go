@@ -110,7 +110,7 @@ func (self Router) ServeEditRecipe() registerable.Registration {
 	}
 }
 
-func editRecipe(db *sql.DB, id int64, r *http.Request) (err error) {
+func editRecipe(db *sql.DB, id int64, r *http.Request) (path string, err error) {
 	ctx := context.Background()
 	var tx *sql.Tx
 	tx, err = db.BeginTx(ctx, nil)
@@ -151,9 +151,15 @@ func editRecipe(db *sql.DB, id int64, r *http.Request) (err error) {
 		totalTime = parsedTotalTime
 	}
 
+	new_path := fmt.Sprintf("%v", id)
+	if np, ok := r.Form["Path"]; ok && np[0] != "" {
+		new_path = np[0]
+	}
+
 	// update recipe
 	recipe := models.Recipe{
 		ID:           null.Int64From(id),
+		Path:         null.StringFrom(new_path),
 		Image:        null.BytesFrom(imgB),
 		Title:        null.StringFrom(r.Form["Title"][0]),
 		Author:       null.StringFrom(r.Form["Author"][0]),
@@ -164,7 +170,7 @@ func editRecipe(db *sql.DB, id int64, r *http.Request) (err error) {
 		Instructions: null.StringFrom(r.Form["Instructions"][0]),
 	}
 
-	whitelist := []string{"title", "author", "calories", "serving_size", "yields", "total_time", "instructions"}
+	whitelist := []string{"title", "author", "calories", "serving_size", "yields", "total_time", "instructions", "path"}
 	if len(imgB) > 0 {
 		whitelist = append(whitelist, "image")
 	}
@@ -228,7 +234,8 @@ func editRecipe(db *sql.DB, id int64, r *http.Request) (err error) {
 		}
 	}
 
-	return nil
+	path = recipe.Path.String
+	return
 }
 
 func (self Router) EditRecipe() registerable.Registration {
@@ -248,10 +255,10 @@ func (self Router) EditRecipe() registerable.Registration {
 				return
 			}
 
-			err = func() error {
+			path, err := func() (string, error) {
 				// parse form
 				if err := r.ParseMultipartForm(32 << 20); err != nil {
-					return err
+					return "", err
 				}
 
 				// update recipe
@@ -263,7 +270,7 @@ func (self Router) EditRecipe() registerable.Registration {
 				return
 			}
 
-			redirectURL := fmt.Sprintf("/recipe/%v", id)
+			redirectURL := fmt.Sprintf("/recipe/%v", path)
 			http.Redirect(w, r, redirectURL, http.StatusFound)
 		},
 	}

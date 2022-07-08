@@ -11,6 +11,7 @@ import (
 	"github.com/arpachuilo/go-registerable"
 	"github.com/gorilla/mux"
 	"github.com/volatiletech/null/v8"
+	. "github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 func deleteRecipe(db *sql.DB, id int64) (err error) {
@@ -43,6 +44,24 @@ func deleteRecipe(db *sql.DB, id int64) (err error) {
 	)
 
 	if _, err = ingredientsDeleteQuery.DeleteAll(context.Background(), tx); err != nil {
+		return
+	}
+
+	// delete tags
+	tagsDeleteQuery := models.Tags(
+		models.TagWhere.Recipeid.EQ(null.Int64From(id)),
+	)
+
+	if _, err = tagsDeleteQuery.DeleteAll(context.Background(), tx); err != nil {
+		return
+	}
+
+	// delete orphaned tags
+	orphanedTagsDeleteQuery := models.Tags(
+		Where("not exists (select id from recipes where id = recipeid)"),
+	)
+
+	if _, err = orphanedTagsDeleteQuery.DeleteAll(context.Background(), tx); err != nil {
 		return
 	}
 

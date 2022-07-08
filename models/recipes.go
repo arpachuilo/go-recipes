@@ -34,6 +34,7 @@ type Recipe struct {
 	ServingSize  null.String `boil:"serving_size" json:"serving_size,omitempty" toml:"serving_size" yaml:"serving_size,omitempty"`
 	Calories     null.String `boil:"calories" json:"calories,omitempty" toml:"calories" yaml:"calories,omitempty"`
 	Image        null.Bytes  `boil:"image" json:"image,omitempty" toml:"image" yaml:"image,omitempty"`
+	Path         null.String `boil:"path" json:"path,omitempty" toml:"path" yaml:"path,omitempty"`
 
 	R *recipeR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L recipeL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -50,6 +51,7 @@ var RecipeColumns = struct {
 	ServingSize  string
 	Calories     string
 	Image        string
+	Path         string
 }{
 	ID:           "id",
 	URL:          "url",
@@ -61,6 +63,7 @@ var RecipeColumns = struct {
 	ServingSize:  "serving_size",
 	Calories:     "calories",
 	Image:        "image",
+	Path:         "path",
 }
 
 var RecipeTableColumns = struct {
@@ -74,6 +77,7 @@ var RecipeTableColumns = struct {
 	ServingSize  string
 	Calories     string
 	Image        string
+	Path         string
 }{
 	ID:           "recipes.id",
 	URL:          "recipes.url",
@@ -85,6 +89,7 @@ var RecipeTableColumns = struct {
 	ServingSize:  "recipes.serving_size",
 	Calories:     "recipes.calories",
 	Image:        "recipes.image",
+	Path:         "recipes.path",
 }
 
 // Generated where
@@ -124,6 +129,7 @@ var RecipeWhere = struct {
 	ServingSize  whereHelpernull_String
 	Calories     whereHelpernull_String
 	Image        whereHelpernull_Bytes
+	Path         whereHelpernull_String
 }{
 	ID:           whereHelpernull_Int64{field: "\"recipes\".\"id\""},
 	URL:          whereHelpernull_String{field: "\"recipes\".\"url\""},
@@ -135,6 +141,7 @@ var RecipeWhere = struct {
 	ServingSize:  whereHelpernull_String{field: "\"recipes\".\"serving_size\""},
 	Calories:     whereHelpernull_String{field: "\"recipes\".\"calories\""},
 	Image:        whereHelpernull_Bytes{field: "\"recipes\".\"image\""},
+	Path:         whereHelpernull_String{field: "\"recipes\".\"path\""},
 }
 
 // RecipeRels is where relationship names are stored.
@@ -161,9 +168,9 @@ func (*recipeR) NewStruct() *recipeR {
 type recipeL struct{}
 
 var (
-	recipeAllColumns            = []string{"id", "url", "title", "instructions", "author", "total_time", "yields", "serving_size", "calories", "image"}
+	recipeAllColumns            = []string{"id", "url", "title", "instructions", "author", "total_time", "yields", "serving_size", "calories", "image", "path"}
 	recipeColumnsWithoutDefault = []string{}
-	recipeColumnsWithDefault    = []string{"id", "url", "title", "instructions", "author", "total_time", "yields", "serving_size", "calories", "image"}
+	recipeColumnsWithDefault    = []string{"id", "url", "title", "instructions", "author", "total_time", "yields", "serving_size", "calories", "image", "path"}
 	recipePrimaryKeyColumns     = []string{"id"}
 	recipeGeneratedColumns      = []string{"id"}
 )

@@ -1224,7 +1224,7 @@ func testRecipesSelect(t *testing.T) {
 }
 
 var (
-	recipeDBTypes = map[string]string{`ID`: `INTEGER`, `URL`: `TEXT`, `Title`: `TEXT`, `Instructions`: `TEXT`, `Author`: `TEXT`, `TotalTime`: `INT`, `Yields`: `TEXT`, `ServingSize`: `TEXT`, `Calories`: `TEXT`, `Image`: `BLOB`}
+	recipeDBTypes = map[string]string{`ID`: `INTEGER`, `URL`: `TEXT`, `Title`: `TEXT`, `Instructions`: `TEXT`, `Author`: `TEXT`, `TotalTime`: `INT`, `Yields`: `TEXT`, `ServingSize`: `TEXT`, `Calories`: `TEXT`, `Image`: `BLOB`, `Path`: `TEXT`}
 	_             = bytes.MinRead
 )
 

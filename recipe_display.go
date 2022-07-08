@@ -6,7 +6,6 @@ import (
 	"go-recipes/models"
 	"html/template"
 	"net/http"
-	"strconv"
 
 	"github.com/arpachuilo/go-registerable"
 	"github.com/gorilla/mux"
@@ -30,17 +29,13 @@ func (self Router) ServeRecipeDisplay() registerable.Registration {
 
 	return HandlerRegistration{
 		Name:        "recipe",
-		Path:        "/recipe/{id:[0-9]+}",
+		Path:        "/recipe/{path}",
 		Methods:     []string{"GET"},
 		RequireAuth: self.Auth.enabled,
 		ErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request) error {
-			// get id
+			// get path/id
 			vars := mux.Vars(r)
-			sid := vars["id"]
-			id, err := strconv.ParseInt(sid, 10, 64)
-			if err != nil {
-				return err
-			}
+			path := vars["path"]
 
 			// prepare db
 			ctx := context.Background()
@@ -52,7 +47,7 @@ func (self Router) ServeRecipeDisplay() registerable.Registration {
 
 			// read recipe
 			recipeQuery := models.Recipes(
-				models.RecipeWhere.ID.EQ(null.Int64From(id)),
+				models.RecipeWhere.Path.EQ(null.StringFrom(path)),
 			)
 
 			recipe, err := recipeQuery.One(ctx, tx)
@@ -62,7 +57,7 @@ func (self Router) ServeRecipeDisplay() registerable.Registration {
 
 			// read ingredients
 			igredientsQuery := models.Ingredients(
-				models.IngredientWhere.Recipeid.EQ(null.Int64From(id)),
+				models.IngredientWhere.Recipeid.EQ(recipe.ID),
 			)
 
 			ingredients, err := igredientsQuery.All(ctx, tx)
@@ -72,7 +67,7 @@ func (self Router) ServeRecipeDisplay() registerable.Registration {
 
 			// read tags
 			tagsQuery := models.Tags(
-				models.TagWhere.Recipeid.EQ(null.Int64From(id)),
+				models.TagWhere.Recipeid.EQ(recipe.ID),
 			)
 
 			tags, err := tagsQuery.All(ctx, tx)

@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"go-recipes/models"
 	"net/http"
-	"strconv"
 	"sync"
 
 	"github.com/arpachuilo/go-registerable"
@@ -48,18 +47,7 @@ func (self RecipeImageFileServer) ServeHTTP(w http.ResponseWriter, r *http.Reque
 
 	// get id
 	vars := mux.Vars(r)
-	id, err := strconv.ParseInt(vars["id"], 10, 64)
-	if err != nil {
-		self.h404.ServeHTTP(w, r)
-		return
-	}
-
-	// // check images
-	// if img, ok := self.images[id]; ok {
-	// 	w.Header().Set("ETag", self.etags.Add(id, img, false))
-	// 	w.Write(img)
-	// 	return
-	// }
+	path := vars["path"]
 
 	// prepare db
 	ctx := r.Context()
@@ -72,8 +60,8 @@ func (self RecipeImageFileServer) ServeHTTP(w http.ResponseWriter, r *http.Reque
 
 	// read recipe
 	recipeQuery := models.Recipes(
-		Select("image"),
-		models.RecipeWhere.ID.EQ(null.Int64From(id)),
+		Select("id, image"),
+		models.RecipeWhere.Path.EQ(null.StringFrom(path)),
 	)
 
 	recipe, err := recipeQuery.One(ctx, tx)
@@ -82,11 +70,7 @@ func (self RecipeImageFileServer) ServeHTTP(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	// cache recipe image
-	// self.images[id] = recipe.Image.Bytes
-
-	// w.Header().Set("ETag", self.ImageETags.Add())
-	w.Header().Set("ETag", self.etags.Add(id, recipe.Image.Bytes, false))
+	w.Header().Set("ETag", self.etags.Add(recipe.ID.Int64, recipe.Image.Bytes, false))
 	w.Write(recipe.Image.Bytes)
 }
 
@@ -94,7 +78,7 @@ func (self Router) ServeRecipeImages() registerable.Registration {
 	imageFS := NewRecipeImageFileServer("images", self.DB, self.ImageETags)
 	return HandlerRegistration{
 		Name:    "images",
-		Path:    "/images/recipe/{id:[0-9]+}",
+		Path:    "/images/recipe/{path}",
 		Methods: []string{"GET"},
 
 		RequireAuth: self.Auth.enabled,

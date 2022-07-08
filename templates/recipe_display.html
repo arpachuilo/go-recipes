@@ -11,11 +11,11 @@
     <div style="display: flex; position: relative; z-index: 1">
       <div
         class="blur"
-        style="background-image: url('/images/recipe/{{ .Recipe.ID.Int64 }}');"
+        style="background-image: url('/images/recipe/{{ .Recipe.Path.String }}');"
       ></div>
       <img
         style="margin: auto"
-        src="/images/recipe/{{ .Recipe.ID.Int64 }}"
+        src="/images/recipe/{{ .Recipe.Path.String }}"
         alt="{{ .Recipe.Title.String }}"
       />
     </div>

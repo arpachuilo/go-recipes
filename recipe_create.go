@@ -96,8 +96,15 @@ func createRecipe(db *sql.DB, r *http.Request) (id int64, err error) {
 		totalTime = parsedTotalTime
 	}
 
+	// custom path
+	var new_path *string
+	if np, ok := r.Form["Path"]; ok && np[0] != "" {
+		new_path = &np[0]
+	}
+
 	// update recipe
 	recipe := models.Recipe{
+		Path:         null.StringFromPtr(new_path),
 		Title:        null.StringFrom(r.Form["Title"][0]),
 		Image:        null.BytesFrom(imgB),
 		Author:       null.StringFrom(r.Form["Author"][0]),
@@ -108,7 +115,7 @@ func createRecipe(db *sql.DB, r *http.Request) (id int64, err error) {
 		Instructions: null.StringFrom(r.Form["Instructions"][0]),
 	}
 
-	whitelist := []string{"title", "author", "calories", "serving_size", "yields", "total_time", "instructions"}
+	whitelist := []string{"title", "author", "calories", "serving_size", "yields", "total_time", "instructions", "path"}
 	if len(imgB) > 0 {
 		whitelist = append(whitelist, "image")
 	}
@@ -154,6 +161,7 @@ func createRecipe(db *sql.DB, r *http.Request) (id int64, err error) {
 		}
 	}
 
+	// get new path
 	id = recipe.ID.Int64
 	return
 }
@@ -168,7 +176,7 @@ func (self Router) CreateRecipe() registerable.Registration {
 			id, err := func() (int64, error) {
 				// parse form
 				if err := r.ParseMultipartForm(32 << 20); err != nil {
-					return 0, err
+					return -1, err
 				}
 
 				return createRecipe(self.DB, r)
