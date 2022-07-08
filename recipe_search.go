@@ -127,7 +127,7 @@ func (self Router) ServeSearch() registerable.Registration {
 
 			count, err := query.Count(ctx, tx)
 			if err != nil {
-				return err
+				count = 0
 			}
 
 			// generate pages
