@@ -107,27 +107,33 @@ func (self Router) ServeSearch() registerable.Registration {
 				Limit(limit),
 				Offset(offset),
 				GroupBy("recipes.id"),
-				Having("COUNT(DISTINCT t.id) >= ?", len(tags)),
+				Having("count(distinct t.id) >= ?", len(tags)),
 			)
 
 			recipes, err := query.All(ctx, tx)
 			if err != nil {
+				fmt.Println(err)
 				return err
 			}
 
 			// get total for this query
-			query = models.Recipes(
-				Distinct("recipes.id"),
-				LeftOuterJoin("ingredients i on i.recipeid = recipes.id"),
-				LeftOuterJoin("tags t on t.recipeid = recipes.id"),
-				where,
-				GroupBy("recipes.id"),
-				Having("COUNT(DISTINCT t.id) >= ?", len(tags)),
-			)
+			countQuery := fmt.Sprintf(`
+                          select count(*)
+                          from (
+                            select recipes.id
+                            from recipes
+                            left outer join ingredients i on i.recipeid = recipes.id
+                            left outer join tags t on t.recipeid = recipes.id
+                            where %v
+                            group by recipes.id
+                            having count(distinct t.id) >= ?
+                          )`, whereClause)
 
-			count, err := query.Count(ctx, tx)
+			count := 0
+			row := tx.QueryRow(countQuery, filter, filter, filter, len(tags))
+			err = row.Scan(&count)
 			if err != nil {
-				count = 0
+				return err
 			}
 
 			// generate pages
