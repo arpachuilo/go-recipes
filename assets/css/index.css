@@ -794,6 +794,33 @@ input[disabled] {
   cursor: not-allowed;
 }
 
+div.chip-container {
+  background: linear-gradient(var(--crust) 0%, var(--crust) 100%) 0 0,
+    linear-gradient(var(--crust) 0%, var(--crust) 100%) 100% 0;
+  background-attachment: scroll, scroll;
+  background-size: 1px 100%, 1px 100%;
+  background-repeat: no-repeat, no-repeat;
+
+  display: flex;
+  font-size: 1em;
+  align-items: baseline;
+  margin-top: 0.5em;
+  overflow-x: scroll;
+}
+
+div.chip-container div.chip:nth-of-type(1) {
+  border-left: 1px solid var(--base);
+}
+
+div.chip-container div.chip:nth-last-of-type(1) {
+  border-right: 1px solid var(--base);
+}
+
+div.chip {
+  width: auto;
+  min-width: fit-content;
+}
+
 label.chip {
   outline: 0;
   box-sizing: border-box;
@@ -804,6 +831,7 @@ label.chip {
   font-size: 1em;
   display: inline-block;
   width: auto;
+  min-width: fit-content;
   cursor: pointer;
   transition: background ease 0.33s;
 

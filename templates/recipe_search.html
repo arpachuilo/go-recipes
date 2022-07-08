@@ -21,38 +21,33 @@
     <input type="submit" value="Search" style="margin-left: 0.5rem" />
   </div>
 
-  <div
-    style="
-      display: flex;
-      font-size: 1em;
-      align-items: baseline;
-      margin-top: 0.5em;
-    "
-  >
+  <div class="chip-container">
     {{ $st := .SelectedTags }} {{ range $i, $t := .PossibleTags }}
-    <input
-      {{
-      if
-      hasTag
-      $t
-      $st
-      }}
-      checked
-      {{
-      end
-      }}
-      class="chip"
-      id="tag-{{ $i }}"
-      type="checkbox"
-      name="tags"
-      value="{{ $t.Tag.String }}"
-      hx-get="/"
-      hx-trigger="click"
-      hx-target="#search-results"
-      hx-push-url="true"
-      hx-include="[name='tags'], [name='search']"
-    />
-    <label for="tag-{{ $i }}" class="chip"> {{ $t.Tag.String }} </label>
+    <div class="chip">
+      <input
+        {{
+        if
+        hasTag
+        $t
+        $st
+        }}
+        checked
+        {{
+        end
+        }}
+        class="chip"
+        id="tag-{{ $i }}"
+        type="checkbox"
+        name="tags"
+        value="{{ $t.Tag.String }}"
+        hx-get="/"
+        hx-trigger="click"
+        hx-target="#search-results"
+        hx-push-url="true"
+        hx-include="[name='tags'], [name='search']"
+      />
+      <label for="tag-{{ $i }}" class="chip"> {{ $t.Tag.String }} </label>
+    </div>
     {{ end }}
   </div>
 </form>
