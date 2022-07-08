@@ -807,7 +807,7 @@ label.chip {
   cursor: pointer;
   transition: background ease 0.33s;
 
-  border-radius: 20% / 50%;
+  border-radius: 500px;
 
   border: 1px solid var(--surface0);
   background: var(--surface0);
