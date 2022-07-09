@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"go-recipes/models"
 	"html/template"
@@ -15,7 +16,7 @@ import (
 
 	"github.com/arpachuilo/go-registerable"
 	"github.com/chai2010/webp"
-	"github.com/gorilla/mux"
+	"github.com/labstack/echo/v4"
 	"github.com/nfnt/resize"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
@@ -29,35 +30,29 @@ type EditTemplate struct {
 	Tags        models.TagSlice
 }
 
-func (self Router) ServeEditRecipe() registerable.Registration {
+func (self App) ServeEditRecipe() registerable.Registration {
 	// read templates dynamically for debug
+	tmplName := "recipe_edit"
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
 		"templates/base.html",
 		"templates/nav.html",
 		"templates/recipe_edit.html",
 	))
 
-	return HandlerRegistration{
-		Name:        "edit",
-		Path:        "/edit/{id:[0-9]+}",
-		Methods:     []string{"GET"},
+	self.TemplateRenderer.Add(tmplName, tmpl)
+	return EchoHandlerRegistration{
+		Path:        "/edit/:id",
+		Methods:     []Method{GET},
 		RequireAuth: self.Auth.enabled,
-		ErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request) error {
+		HandlerFunc: func(c echo.Context) error {
 			// get id
-			vars := mux.Vars(r)
-			sid := vars["id"]
-			id, err := strconv.ParseInt(sid, 10, 64)
+			id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 			if err != nil {
 				return err
 			}
 
 			// get error if any
-			rq := r.URL.Query()
-			error := ""
-			keys, ok := rq["error"]
-			if ok && len(keys) > 0 {
-				error = keys[0]
-			}
+			error := c.QueryParam("error")
 
 			// prepare db
 			ctx := context.Background()
@@ -74,6 +69,10 @@ func (self Router) ServeEditRecipe() registerable.Registration {
 
 			recipe, err := recipeQuery.One(ctx, tx)
 			if err != nil {
+				if errors.Is(err, sql.ErrNoRows) {
+					return echo.NewHTTPError(http.StatusNotFound, "Could not find requested recipe.")
+				}
+
 				return err
 			}
 
@@ -105,12 +104,12 @@ func (self Router) ServeEditRecipe() registerable.Registration {
 				Tags:        tags,
 			}
 
-			return tmpl.Execute(w, data)
+			return c.Render(http.StatusOK, tmplName, data)
 		},
 	}
 }
 
-func editRecipe(db *sql.DB, id int64, r *http.Request) (path string, err error) {
+func editRecipe(db *sql.DB, id int64, c echo.Context) (path string, err error) {
 	ctx := context.Background()
 	var tx *sql.Tx
 	tx, err = db.BeginTx(ctx, nil)
@@ -127,33 +126,36 @@ func editRecipe(db *sql.DB, id int64, r *http.Request) (path string, err error) 
 
 	// read image (if any)
 	var imgB []byte
-	f, _, _ := r.FormFile("Image")
-	if f != nil {
-		// decode img
-		var img image.Image
-		img, _, err = image.Decode(f)
-		if err != nil {
-			return
-		}
+	fh, err := c.FormFile("Image")
+	if err == nil {
+		f, _ := fh.Open()
+		if f != nil {
+			// decode img
+			var img image.Image
+			img, _, err = image.Decode(f)
+			if err != nil {
+				return
+			}
 
-		// resize img
-		img = resize.Resize(360, 0, img, resize.Lanczos3)
-		imgB, err = webp.EncodeRGB(img, webp.DefaulQuality)
-		if err != nil {
-			return
+			// resize img
+			img = resize.Resize(360, 0, img, resize.Lanczos3)
+			imgB, err = webp.EncodeRGB(img, webp.DefaulQuality)
+			if err != nil {
+				return
+			}
 		}
 	}
 
 	// read total time
 	var totalTime int64
-	parsedTotalTime, err := strconv.ParseInt(r.Form["TotalTime"][0], 10, 64)
+	parsedTotalTime, err := strconv.ParseInt(c.FormValue("TotalTime"), 10, 64)
 	if err == nil {
 		totalTime = parsedTotalTime
 	}
 
 	new_path := fmt.Sprintf("%v", id)
-	if np, ok := r.Form["Path"]; ok && np[0] != "" {
-		new_path = np[0]
+	if np := c.FormValue("Path"); np != "" {
+		new_path = np
 	}
 
 	// update recipe
@@ -161,13 +163,13 @@ func editRecipe(db *sql.DB, id int64, r *http.Request) (path string, err error) 
 		ID:           null.Int64From(id),
 		Path:         null.StringFrom(new_path),
 		Image:        null.BytesFrom(imgB),
-		Title:        null.StringFrom(r.Form["Title"][0]),
-		Author:       null.StringFrom(r.Form["Author"][0]),
-		Calories:     null.StringFrom(r.Form["Calories"][0]),
-		ServingSize:  null.StringFrom(r.Form["ServingSize"][0]),
-		Yields:       null.StringFrom(r.Form["Yields"][0]),
+		Title:        null.StringFrom(c.FormValue("Title")),
+		Author:       null.StringFrom(c.FormValue("Author")),
+		Calories:     null.StringFrom(c.FormValue("Calories")),
+		ServingSize:  null.StringFrom(c.FormValue("ServingSize")),
+		Yields:       null.StringFrom(c.FormValue("Yields")),
 		TotalTime:    null.Int64From(totalTime),
-		Instructions: null.StringFrom(r.Form["Instructions"][0]),
+		Instructions: null.StringFrom(c.FormValue("Instructions")),
 	}
 
 	whitelist := []string{"title", "author", "calories", "serving_size", "yields", "total_time", "instructions", "path"}
@@ -189,7 +191,7 @@ func editRecipe(db *sql.DB, id int64, r *http.Request) (path string, err error) 
 	}
 
 	// insert new ingredients
-	ingredientText := r.Form["Ingredients"][0]
+	ingredientText := c.FormValue("Ingredients")
 	for _, i := range strings.Split(ingredientText, "\n") {
 		if strings.TrimSpace(i) == "" {
 			continue
@@ -216,7 +218,7 @@ func editRecipe(db *sql.DB, id int64, r *http.Request) (path string, err error) 
 	}
 
 	// insert new ingredients
-	tagsText := r.Form["Tags"][0]
+	tagsText := c.FormValue("Tags")
 	for _, t := range strings.Split(tagsText, ",") {
 		tf := strings.ToLower(strings.TrimSpace(t))
 		if tf == "" {
@@ -238,40 +240,28 @@ func editRecipe(db *sql.DB, id int64, r *http.Request) (path string, err error) 
 	return
 }
 
-func (self Router) EditRecipe() registerable.Registration {
-	return HandlerRegistration{
-		Name:        "edit recipe",
-		Path:        "/edit/{id:[0-9]+}",
-		Methods:     []string{"POST"},
+func (self App) EditRecipe() registerable.Registration {
+	return EchoHandlerRegistration{
+		Path:        "/edit/:id",
+		Methods:     []Method{POST},
 		RequireAuth: self.Auth.enabled,
-		HandlerFunc: func(w http.ResponseWriter, r *http.Request) {
+		HandlerFunc: func(c echo.Context) error {
 			// get id
-			vars := mux.Vars(r)
-			sid := vars["id"]
-			id, err := strconv.ParseInt(sid, 10, 64)
+			id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 			if err != nil {
-				redirectURL := fmt.Sprintf("%v?error=%v", r.Header.Get("Referer"), err)
-				http.Redirect(w, r, redirectURL, http.StatusFound)
-				return
+				redirectURL := fmt.Sprintf("%v?error=%v", c.Request().Referer(), err)
+				return c.Redirect(http.StatusFound, redirectURL)
 			}
 
-			path, err := func() (string, error) {
-				// parse form
-				if err := r.ParseMultipartForm(32 << 20); err != nil {
-					return "", err
-				}
-
-				// update recipe
-				return editRecipe(self.DB, id, r)
-			}()
+			// update recipe
+			path, err := editRecipe(self.DB, id, c)
 			if err != nil {
-				redirectURL := fmt.Sprintf("%v?error=%v", r.Header.Get("Referer"), err)
-				http.Redirect(w, r, redirectURL, http.StatusFound)
-				return
+				redirectURL := fmt.Sprintf("%v?error=%v", c.Request().Referer(), err)
+				return c.Redirect(http.StatusFound, redirectURL)
 			}
 
 			redirectURL := fmt.Sprintf("/recipe/%v", path)
-			http.Redirect(w, r, redirectURL, http.StatusFound)
+			return c.Redirect(http.StatusFound, redirectURL)
 		},
 	}
 }

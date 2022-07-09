@@ -2,13 +2,15 @@ package main
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"go-recipes/models"
 	"html/template"
 	"net/http"
 
 	"github.com/arpachuilo/go-registerable"
-	"github.com/gorilla/mux"
+	"github.com/labstack/echo/v4"
 	"github.com/volatiletech/null/v8"
 )
 
@@ -19,23 +21,24 @@ type RecipeTemplate struct {
 	Tags        models.TagSlice
 }
 
-func (self Router) ServeRecipeDisplay() registerable.Registration {
+func (self App) ServeRecipeDisplay() registerable.Registration {
 	// read templates dynamically for debug
+	tmplName := "recipe_display"
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
 		"templates/base.html",
 		"templates/nav.html",
 		"templates/recipe_display.html",
 	))
 
-	return HandlerRegistration{
-		Name:        "recipe",
-		Path:        "/recipe/{path}",
-		Methods:     []string{"GET"},
+	self.TemplateRenderer.Add(tmplName, tmpl)
+
+	return EchoHandlerRegistration{
+		Path:        "/recipe/:path",
+		Methods:     []Method{GET},
 		RequireAuth: self.Auth.enabled,
-		ErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request) error {
+		HandlerFunc: func(c echo.Context) error {
 			// get path/id
-			vars := mux.Vars(r)
-			path := vars["path"]
+			path := c.Param("path")
 
 			// prepare db
 			ctx := context.Background()
@@ -52,6 +55,10 @@ func (self Router) ServeRecipeDisplay() registerable.Registration {
 
 			recipe, err := recipeQuery.One(ctx, tx)
 			if err != nil {
+				if errors.Is(err, sql.ErrNoRows) {
+					return echo.NewHTTPError(http.StatusNotFound, "Could not find requested recipe.")
+				}
+
 				return err
 			}
 
@@ -83,7 +90,7 @@ func (self Router) ServeRecipeDisplay() registerable.Registration {
 				Tags:        tags,
 			}
 
-			return tmpl.Execute(w, data)
+			return c.Render(http.StatusOK, tmplName, data)
 		},
 	}
 }

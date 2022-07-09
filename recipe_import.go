@@ -9,6 +9,7 @@ import (
 	"os/exec"
 
 	"github.com/arpachuilo/go-registerable"
+	"github.com/labstack/echo/v4"
 	"github.com/volatiletech/null/v8"
 )
 
@@ -17,33 +18,30 @@ type ImportTemplate struct {
 	Error string
 }
 
-func (self Router) ServeRecipeImport() registerable.Registration {
+func (self App) ServeRecipeImport() registerable.Registration {
 	// read templates dynamically for debug
+	tmplName := "recipe_import"
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
 		"templates/base.html",
 		"templates/nav.html",
 		"templates/recipe_import.html",
 	))
 
-	return HandlerRegistration{
-		Name:        "import",
+	self.TemplateRenderer.Add(tmplName, tmpl)
+
+	return EchoHandlerRegistration{
 		Path:        "/import",
-		Methods:     []string{"GET"},
+		Methods:     []Method{GET},
 		RequireAuth: self.Auth.enabled,
-		ErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request) error {
-			rq := r.URL.Query()
-			error := ""
-			keys, ok := rq["error"]
-			if ok && len(keys) > 0 {
-				error = keys[0]
-			}
+		HandlerFunc: func(c echo.Context) error {
+			error := c.QueryParam("error")
 
 			data := ImportTemplate{
 				Title: "Import Recipe from URL",
 				Error: error,
 			}
 
-			return tmpl.Execute(w, data)
+			return c.Render(http.StatusOK, tmplName, data)
 		},
 	}
 }
@@ -59,27 +57,21 @@ func scrapeRecipe(db, url string) error {
 	return nil
 }
 
-func (self Router) ImportRecipe() registerable.Registration {
-	return HandlerRegistration{
-		Name:        "scrape",
+func (self App) ImportRecipe() registerable.Registration {
+	return EchoHandlerRegistration{
 		Path:        "/import",
-		Methods:     []string{"POST"},
+		Methods:     []Method{POST},
 		RequireAuth: self.Auth.enabled,
-		HandlerFunc: func(w http.ResponseWriter, r *http.Request) {
+		HandlerFunc: func(c echo.Context) error {
 			path, err := func() (string, error) {
-				// parse form
-				if err := r.ParseForm(); err != nil {
-					return "", err
-				}
-
 				// get url to import
-				importURL, ok := r.Form["url"]
-				if !ok || len(importURL) == 0 {
+				importURL := c.FormValue("url")
+				if importURL == "" {
 					return "", fmt.Errorf("%v", "not url provided")
 				}
 
 				// scrape url
-				if err := scrapeRecipe("recipes.db", importURL[0]); err != nil {
+				if err := scrapeRecipe("recipes.db", importURL); err != nil {
 					return "", err
 				}
 
@@ -92,7 +84,7 @@ func (self Router) ImportRecipe() registerable.Registration {
 				}
 
 				query := models.Recipes(
-					models.RecipeWhere.URL.EQ(null.StringFrom(importURL[0])),
+					models.RecipeWhere.URL.EQ(null.StringFrom(importURL)),
 				)
 
 				recipe, err := query.One(ctx, tx)
@@ -104,13 +96,12 @@ func (self Router) ImportRecipe() registerable.Registration {
 
 			}()
 			if err != nil {
-				redirectURL := fmt.Sprintf("%v?error=%v", r.Header.Get("Referer"), err)
-				http.Redirect(w, r, redirectURL, http.StatusFound)
-				return
+				redirectURL := fmt.Sprintf("%v?error=%v", c.Request().Referer(), err)
+				return c.Redirect(http.StatusFound, redirectURL)
 			}
 
 			redirectURL := fmt.Sprintf("/edit/%v", path)
-			http.Redirect(w, r, redirectURL, http.StatusFound)
+			return c.Redirect(http.StatusFound, redirectURL)
 		},
 	}
 }

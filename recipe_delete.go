@@ -9,7 +9,7 @@ import (
 	"strconv"
 
 	"github.com/arpachuilo/go-registerable"
-	"github.com/gorilla/mux"
+	"github.com/labstack/echo/v4"
 	"github.com/volatiletech/null/v8"
 	. "github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
@@ -68,21 +68,17 @@ func deleteRecipe(db *sql.DB, id int64) (err error) {
 	return nil
 }
 
-func (self Router) DeleteRecipe() registerable.Registration {
-	return HandlerRegistration{
-		Name:        "delete",
-		Path:        "/delete/{id:[0-9]+}",
-		Methods:     []string{"POST"}, // work with HTML form standards
+func (self App) DeleteRecipe() registerable.Registration {
+	return EchoHandlerRegistration{
+		Path:        "/delete/:id",
+		Methods:     []Method{POST}, // work with HTML form standards
 		RequireAuth: self.Auth.enabled,
-		HandlerFunc: func(w http.ResponseWriter, r *http.Request) {
+		HandlerFunc: func(c echo.Context) error {
 			// get id
-			vars := mux.Vars(r)
-			sid := vars["id"]
-			id, err := strconv.ParseInt(sid, 10, 64)
+			id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 			if err != nil {
-				redirectURL := fmt.Sprintf("%v?error=%v", r.Header.Get("Referer"), err)
-				http.Redirect(w, r, redirectURL, http.StatusFound)
-				return
+				redirectURL := fmt.Sprintf("%v?error=%v", c.Request().Referer(), err)
+				return c.Redirect(http.StatusFound, redirectURL)
 			}
 
 			// delete recipe
@@ -95,13 +91,12 @@ func (self Router) DeleteRecipe() registerable.Registration {
 
 			}()
 			if err != nil {
-				redirectURL := fmt.Sprintf("%v?error=%v", r.Header.Get("Referer"), err)
-				http.Redirect(w, r, redirectURL, http.StatusFound)
-				return
+				redirectURL := fmt.Sprintf("%v?error=%v", c.Request().Referer(), err)
+				return c.Redirect(http.StatusFound, redirectURL)
 			}
 
 			redirectURL := "/"
-			http.Redirect(w, r, redirectURL, http.StatusFound)
+			return c.Redirect(http.StatusFound, redirectURL)
 		},
 	}
 }

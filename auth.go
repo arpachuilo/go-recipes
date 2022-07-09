@@ -13,6 +13,7 @@ import (
 	"github.com/arpachuilo/go-registerable"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 )
@@ -40,8 +41,8 @@ func NewAuth(conf AuthConfig) *Auth {
 	return &Auth{conf.MagicLinkHost, conf.Enabled, []byte(conf.Secret), conf.VerificationExpiresAfter, conf.TokenName, conf.TokenExpiresAfter}
 }
 
-func (self *Auth) VerifyToken(r *http.Request) bool {
-	cookie, err := r.Cookie(self.tokenName)
+func (self *Auth) VerifyToken(c echo.Context) bool {
+	cookie, err := c.Cookie(self.tokenName)
 	if err != nil {
 		return false
 	}
@@ -60,28 +61,15 @@ func (self *Auth) VerifyToken(r *http.Request) bool {
 	return token.Valid
 }
 
-func (self *Auth) UseFunc(next http.HandlerFunc) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if self.enabled && !self.VerifyToken(r) {
-			w.Header().Add("Content-Type", "text/html; charset=UTF-8")
-			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
-			return
+func (self *Auth) Use(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		if self.enabled && !self.VerifyToken(c) {
+			c.Response().Header().Add("Content-Type", "text/html; charset=UTF-8")
+			return c.Redirect(http.StatusTemporaryRedirect, "/login")
 		}
 
-		next(w, r)
-	})
-}
-
-func (self *Auth) Use(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if self.enabled && !self.VerifyToken(r) {
-			w.Header().Add("Content-Type", "text/html; charset=UTF-8")
-			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	})
+		return next(c)
+	}
 }
 
 type LoginTemplate struct {
@@ -89,33 +77,29 @@ type LoginTemplate struct {
 	Error string
 }
 
-func (self Router) ServeLogin() registerable.Registration {
+func (self App) ServeLogin() registerable.Registration {
 	// read templates dynamically for debug
+	tmplName := "login"
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
 		"templates/base.html",
 		"templates/empty_nav.html",
 		"templates/login.html",
 	))
 
-	return HandlerRegistration{
-		Name:    "login",
-		Path:    "/login",
-		Methods: []string{"GET"},
-		ErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request) error {
-			// get error if any
-			rq := r.URL.Query()
-			error := ""
-			keys, ok := rq["error"]
-			if ok && len(keys) > 0 {
-				error = keys[0]
-			}
+	self.TemplateRenderer.Add(tmplName, tmpl)
 
+	return EchoHandlerRegistration{
+		Path:    "/login",
+		Methods: []Method{GET},
+		HandlerFunc: func(c echo.Context) error {
+			// get error if any
+			error := c.QueryParam("error")
 			data := LoginTemplate{
 				Title: "Login",
 				Error: error,
 			}
 
-			return tmpl.Execute(w, data)
+			return c.Render(http.StatusOK, tmplName, data)
 		},
 	}
 }
@@ -125,20 +109,21 @@ type MagicLinkTemplate struct {
 	Expiry string
 }
 
-func (self Router) SendLink() registerable.Registration {
+func (self App) SendLink() registerable.Registration {
+	tmplName := "magic_link"
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
 		"templates/magic_link.html",
 	))
 
-	return HandlerRegistration{
-		Name:    "send link",
+	self.TemplateRenderer.Add(tmplName, tmpl)
+
+	return EchoHandlerRegistration{
 		Path:    "/send-link",
-		Methods: []string{"POST"},
-		HandlerFunc: func(w http.ResponseWriter, r *http.Request) {
+		Methods: []Method{POST},
+		HandlerFunc: func(c echo.Context) error {
 			err := func() error {
-				r.ParseForm()
 				// get email
-				email := r.Form.Get("email")
+				email := c.FormValue("email")
 				if email == "" {
 					return errors.New("email missing")
 				}
@@ -193,47 +178,47 @@ func (self Router) SendLink() registerable.Registration {
 				return self.Mailer.Send("Magic Link for Recipes DB", body.String(), email)
 			}()
 			if err != nil {
-				redirectURL := fmt.Sprintf("%v?error=%v", r.Header.Get("Referer"), err)
-				http.Redirect(w, r, redirectURL, http.StatusFound)
-				return
+				redirectURL := fmt.Sprintf("%v?error=%v", c.Request().Referer(), err)
+				return c.Redirect(http.StatusFound, redirectURL)
 			}
 
 			redirectURL := "/link-sent"
-			http.Redirect(w, r, redirectURL, http.StatusFound)
+			return c.Redirect(http.StatusFound, redirectURL)
 		},
 	}
 }
 
-func (self Router) ServeLinkSent() registerable.Registration {
+func (self App) ServeLinkSent() registerable.Registration {
+	tmplName := "link_sent"
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
 		"templates/base.html",
 		"templates/empty_nav.html",
 		"templates/link_sent.html",
 	))
 
-	return HandlerRegistration{
-		Name:    "link sent",
+	self.TemplateRenderer.Add(tmplName, tmpl)
+
+	return EchoHandlerRegistration{
 		Path:    "/link-sent",
-		Methods: []string{"GET"},
-		ErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request) error {
+		Methods: []Method{GET},
+		HandlerFunc: func(c echo.Context) error {
 			data := LoginTemplate{
 				Title: "Magic Link Sent",
 			}
 
-			return tmpl.Execute(w, data)
+			return c.Render(http.StatusOK, tmplName, data)
 		},
 	}
 }
 
-func (self Router) VerifyLink() registerable.Registration {
-	return HandlerRegistration{
-		Name:    "verify link",
+func (self App) VerifyLink() registerable.Registration {
+	return EchoHandlerRegistration{
 		Path:    "/verify-link",
-		Methods: []string{"GET"},
-		HandlerFunc: func(w http.ResponseWriter, r *http.Request) {
+		Methods: []Method{GET},
+		HandlerFunc: func(c echo.Context) error {
 			err := func() error {
 				// parse form
-				verificationCode := r.URL.Query().Get("verification_code")
+				verificationCode := c.QueryParam("verification_code")
 				if verificationCode == "" {
 					return errors.New("empty verification code")
 				}
@@ -288,7 +273,7 @@ func (self Router) VerifyLink() registerable.Registration {
 					return err
 				}
 
-				http.SetCookie(w, &http.Cookie{
+				c.SetCookie(&http.Cookie{
 					Name:    "token",
 					Value:   tokenString,
 					Expires: expiresAt,
@@ -298,12 +283,11 @@ func (self Router) VerifyLink() registerable.Registration {
 			}()
 			if err != nil {
 				redirectURL := fmt.Sprintf("%v?error=%v", "/login", err)
-				http.Redirect(w, r, redirectURL, http.StatusFound)
-				return
+				return c.Redirect(http.StatusOK, redirectURL)
 			}
 
 			redirectURL := "/"
-			http.Redirect(w, r, redirectURL, http.StatusFound)
+			return c.Redirect(http.StatusOK, redirectURL)
 		},
 	}
 }

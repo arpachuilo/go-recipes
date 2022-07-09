@@ -27,11 +27,8 @@ address = ":80"
 read_timeout = "10s"
 write_timeout = "15s"
 idle_timeout = "3m"
-
-  [server.rate_limiter]
-  limit = 30
-  burst = 50
-  timeout = "3m"
+rate_limit = 30
+assets_dir = "assets/static/"
 
   [server.autocert]
   email = "mail@example.com"

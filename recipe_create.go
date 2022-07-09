@@ -13,6 +13,7 @@ import (
 
 	"github.com/arpachuilo/go-registerable"
 	"github.com/chai2010/webp"
+	"github.com/labstack/echo/v4"
 	"github.com/nfnt/resize"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
@@ -23,39 +24,35 @@ type CreateTemplate struct {
 	Error string
 }
 
-func (self Router) ServeCreateRecipe() registerable.Registration {
-	// read templates dynamically for debug
+func (self App) ServeCreateRecipe() registerable.Registration {
+	tmplName := "recipe_create"
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
 		"templates/base.html",
 		"templates/nav.html",
 		"templates/recipe_create.html",
 	))
 
-	return HandlerRegistration{
-		Name:        "create",
+	self.TemplateRenderer.Add(tmplName, tmpl)
+
+	return EchoHandlerRegistration{
 		Path:        "/create",
-		Methods:     []string{"GET"},
+		Methods:     []Method{GET},
 		RequireAuth: self.Auth.enabled,
-		ErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request) error {
+		HandlerFunc: func(c echo.Context) error {
 			// get error if any
-			rq := r.URL.Query()
-			error := ""
-			keys, ok := rq["error"]
-			if ok && len(keys) > 0 {
-				error = keys[0]
-			}
+			err := c.QueryParam("error")
 
 			data := CreateTemplate{
 				Title: "Create Recipe",
-				Error: error,
+				Error: err,
 			}
 
-			return tmpl.Execute(w, data)
+			return c.Render(http.StatusOK, tmplName, data)
 		},
 	}
 }
 
-func createRecipe(db *sql.DB, r *http.Request) (id int64, err error) {
+func createRecipe(db *sql.DB, c echo.Context) (id int64, err error) {
 	ctx := context.Background()
 	var tx *sql.Tx
 	tx, err = db.BeginTx(ctx, nil)
@@ -72,47 +69,51 @@ func createRecipe(db *sql.DB, r *http.Request) (id int64, err error) {
 
 	// read image (if any)
 	var imgB []byte
-	f, _, _ := r.FormFile("Image")
-	if f != nil {
-		// decode img
-		var img image.Image
-		img, _, err = image.Decode(f)
-		if err != nil {
-			return
-		}
+	fh, err := c.FormFile("Image")
+	if err == nil {
+		f, _ := fh.Open()
+		if f != nil {
+			// decode img
+			var img image.Image
+			img, _, err = image.Decode(f)
+			if err != nil {
+				return
+			}
 
-		// resize img
-		img = resize.Resize(360, 0, img, resize.Lanczos3)
-		imgB, err = webp.EncodeRGB(img, webp.DefaulQuality)
-		if err != nil {
-			return
+			// resize img
+			img = resize.Resize(360, 0, img, resize.Lanczos3)
+			imgB, err = webp.EncodeRGB(img, webp.DefaulQuality)
+			if err != nil {
+				return
+			}
 		}
 	}
 
 	// read total time
 	var totalTime int64
-	parsedTotalTime, err := strconv.ParseInt(r.Form["TotalTime"][0], 10, 64)
+	parsedTotalTime, err := strconv.ParseInt(c.FormValue("TotalTime"), 10, 64)
 	if err == nil {
 		totalTime = parsedTotalTime
 	}
 
 	// custom path
 	var new_path *string
-	if np, ok := r.Form["Path"]; ok && np[0] != "" {
-		new_path = &np[0]
+	np := c.FormValue("Path")
+	if np != "" {
+		new_path = &np
 	}
 
 	// update recipe
 	recipe := models.Recipe{
 		Path:         null.StringFromPtr(new_path),
-		Title:        null.StringFrom(r.Form["Title"][0]),
+		Title:        null.StringFrom(c.FormValue("Title")),
 		Image:        null.BytesFrom(imgB),
-		Author:       null.StringFrom(r.Form["Author"][0]),
-		Calories:     null.StringFrom(r.Form["Calories"][0]),
-		ServingSize:  null.StringFrom(r.Form["ServingSize"][0]),
-		Yields:       null.StringFrom(r.Form["Yields"][0]),
+		Author:       null.StringFrom(c.FormValue("Author")),
+		Calories:     null.StringFrom(c.FormValue("Calories")),
+		ServingSize:  null.StringFrom(c.FormValue("ServingSize")),
+		Yields:       null.StringFrom(c.FormValue("Yields")),
 		TotalTime:    null.Int64From(totalTime),
-		Instructions: null.StringFrom(r.Form["Instructions"][0]),
+		Instructions: null.StringFrom(c.FormValue("Instructions")),
 	}
 
 	whitelist := []string{"title", "author", "calories", "serving_size", "yields", "total_time", "instructions", "path"}
@@ -125,7 +126,7 @@ func createRecipe(db *sql.DB, r *http.Request) (id int64, err error) {
 	}
 
 	// insert new ingredients
-	ingredientText := r.Form["Ingredients"][0]
+	ingredientText := c.FormValue("Ingredients")
 	for _, i := range strings.Split(ingredientText, "\n") {
 		if strings.TrimSpace(i) == "" {
 			continue
@@ -143,7 +144,7 @@ func createRecipe(db *sql.DB, r *http.Request) (id int64, err error) {
 	}
 
 	// insert new tags
-	tagsText := r.Form["Tags"][0]
+	tagsText := c.FormValue("Tags")
 	for _, t := range strings.Split(tagsText, ",") {
 		tf := strings.ToLower(strings.TrimSpace(t))
 		if tf == "" {
@@ -166,29 +167,20 @@ func createRecipe(db *sql.DB, r *http.Request) (id int64, err error) {
 	return
 }
 
-func (self Router) CreateRecipe() registerable.Registration {
-	return HandlerRegistration{
-		Name:        "create recipe",
+func (self App) CreateRecipe() registerable.Registration {
+	return EchoHandlerRegistration{
 		Path:        "/create",
-		Methods:     []string{"POST"},
+		Methods:     []Method{POST},
 		RequireAuth: self.Auth.enabled,
-		HandlerFunc: func(w http.ResponseWriter, r *http.Request) {
-			id, err := func() (int64, error) {
-				// parse form
-				if err := r.ParseMultipartForm(32 << 20); err != nil {
-					return -1, err
-				}
-
-				return createRecipe(self.DB, r)
-			}()
+		HandlerFunc: func(c echo.Context) error {
+			id, err := createRecipe(self.DB, c)
 			if err != nil {
-				redirectURL := fmt.Sprintf("%v?error=%v", r.Header.Get("Referer"), err)
-				http.Redirect(w, r, redirectURL, http.StatusFound)
-				return
+				redirectURL := fmt.Sprintf("%v?error=%v", c.Request().Referer(), err)
+				return c.Redirect(http.StatusFound, redirectURL)
 			}
 
 			redirectURL := fmt.Sprintf("/edit/%v", id)
-			http.Redirect(w, r, redirectURL, http.StatusFound)
+			return c.Redirect(http.StatusFound, redirectURL)
 		},
 	}
 }

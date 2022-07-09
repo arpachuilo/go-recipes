@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/arpachuilo/go-registerable"
+	"github.com/labstack/echo/v4"
 	. "github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
@@ -23,8 +24,9 @@ type SearchTemplate struct {
 	Offsets      []int
 }
 
-func (self Router) ServeSearch() registerable.Registration {
+func (self App) ServeSearch() registerable.Registration {
 	// read templates dynamically for debug
+	tmplFullName := "recipe_search_results"
 	fullTemplate := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
 		"templates/base.html",
 		"templates/nav.html",
@@ -32,48 +34,48 @@ func (self Router) ServeSearch() registerable.Registration {
 		"templates/recipe_search_results.html",
 	))
 
+	self.TemplateRenderer.Add(tmplFullName, fullTemplate)
+
+	tmplFragName := "recipe_search_results_partial"
 	fragTemplate := template.Must(template.New("fragment").Funcs(templateFns).ParseFiles(
 		"templates/recipe_search_results.html",
 	))
 
-	return HandlerRegistration{
-		Name:        "search",
+	self.TemplateRenderer.Add(tmplFragName, fragTemplate)
+
+	return EchoHandlerRegistration{
 		Path:        "/",
-		Methods:     []string{"GET"},
+		Methods:     []Method{GET},
 		RequireAuth: self.Auth.enabled,
-		ErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request) error {
-			rq := r.URL.Query()
+		HandlerFunc: func(c echo.Context) error {
 			// get search if any
-			search := ""
-			if keys, ok := rq["search"]; ok && len(keys) > 0 {
-				search = keys[0]
-			}
+			search := c.QueryParam("search")
 
 			// get tags if any
 			var tags []string
-			if keys, ok := rq["tags"]; ok && len(keys) > 0 {
+			if keys, ok := c.QueryParams()["tags"]; ok && len(keys) > 0 {
 				tags = keys
 			}
 
 			// get offset
 			offset := 0
-			if keys, ok := rq["offset"]; ok && len(keys) > 0 {
-				if value, err := strconv.Atoi(keys[0]); err == nil {
+			if value := c.QueryParam("offset"); value != "" {
+				if value, err := strconv.Atoi(value); err == nil {
 					offset = value
 				}
 			}
 
 			// get limit
 			limit := 15
-			if keys, ok := rq["limit"]; ok && len(keys) > 0 {
-				if value, err := strconv.Atoi(keys[0]); err == nil {
+			if value := c.QueryParam("limit"); value != "" {
+				if value, err := strconv.Atoi(value); err == nil {
 					limit = value
 				}
 			}
 
 			// check if this is an htmlx request
 			htmx := false
-			if value, err := strconv.ParseBool(r.Header.Get("HX-Request")); err == nil {
+			if value, err := strconv.ParseBool(c.Request().Header.Get("HX-Request")); err == nil {
 				htmx = value
 			}
 
@@ -168,10 +170,10 @@ func (self Router) ServeSearch() registerable.Registration {
 			}
 
 			if htmx {
-				return fragTemplate.Execute(w, data)
+				return c.Render(http.StatusOK, tmplFragName, data)
 			}
 
-			return fullTemplate.Execute(w, data)
+			return c.Render(http.StatusOK, tmplFullName, data)
 		},
 	}
 }

@@ -1,4 +1,5 @@
 {{ define "title" }}{{ .Title }}{{ end }} {{ define "content" }}
-<h1>500</h1>
-<h6>Something went terribly wrong . . .</h6>
+<h1>{{ .Code }}</h1>
+<h6>{{ .Status }}</h6>
+<p>{{ .Err.Message }}</p>
 {{ end }}
