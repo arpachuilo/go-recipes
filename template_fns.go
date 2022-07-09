@@ -57,7 +57,7 @@ var templateFns map[string]any = template.FuncMap{
 		for index, ingredient := range ingredients {
 			i := ingredient.Ingredient.String
 			// detect if possibly a header (currently doing this sort strictly)
-			if strings.HasPrefix(strings.ToLower(i), "for") && strings.HasSuffix(i, ":") {
+			if strings.HasPrefix(strings.ToLower(i), "for") && strings.HasSuffix(strings.TrimSpace(i), ":") {
 				if !startNewList {
 					// end list
 					formatted = append(formatted, "</ul>")
