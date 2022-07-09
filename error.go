@@ -30,7 +30,7 @@ type ErrorTemplate struct {
 	Title  string
 	Code   int
 	Status string
-	Err    error
+	Err    string
 }
 
 func (self FiveHundredHandler) errorHandler(err error, c echo.Context) {
@@ -43,7 +43,7 @@ func (self FiveHundredHandler) errorHandler(err error, c echo.Context) {
 		Title:  fmt.Sprintf("Error %v", code),
 		Code:   code,
 		Status: http.StatusText(code),
-		Err:    err,
+		Err:    err.Error(),
 	}
 
 	c.Logger().Error(err)
