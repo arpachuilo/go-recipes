@@ -1,10 +1,17 @@
 {{ define "fragment" }} {{ range .Recipes }}
-<figure style="flex-direction: row">
+<figure>
   <a
     style="flex-direction:: row; width: 100%;"
     href="recipe/{{ .Path.String }}"
   >
-    <div style="display: flex; position: relative; z-index: 1">
+    <div
+      style="
+        display: flex;
+        position: relative;
+        justify-content: center;
+        z-index: 1;
+      "
+    >
       <div
         class="blur"
         style="background-image: url('/images/recipe/{{ .Path.String }}');"

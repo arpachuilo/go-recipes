@@ -33,7 +33,6 @@ func (self *TemplateRenderer) Add(name string, tmpl *template.Template) {
 
 // Render renders a template document
 func (self *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
-	// return t.templates.ExecuteTemplate(w, name, data)
 	return self.Templates[name].Execute(w, data)
 }
 

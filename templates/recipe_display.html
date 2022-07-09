@@ -45,17 +45,37 @@
   </a>
 </figure>
 
-{{ if .Tags }}
-<h6>Tags</h6>
-{{ .Tags | flattenTags }} {{ end }}
+<div
+  style="display: flex; justify-content: space-between; align-items: flex-end"
+>
+  {{ if .Tags }}
+  <div>
+    <h6>Tags</h6>
+    <p>{{ .Tags | flattenTags }}</p>
+  </div>
+  {{ end }}
 
-<h2>Ingredients</h2>
-{{ range (.Ingredients | formatIngredients) }} {{ . }} {{ end }}
+  <a href="/edit/{{ .Recipe.ID.Int64 }}"
+    ><input type="button" value="Edit"
+  /></a>
+</div>
 
-<h2>Instructions</h2>
-{{ range (.Recipe.Instructions.String | splitLines) }}
-<p>{{ . }}</p>
-{{ end }}
+<div id="ingredient-instruction-container">
+  <div id="ingredients">
+    <h2>Ingredients</h2>
+    {{ range (.Ingredients | formatIngredients) }} {{ . }} {{ end }}
+  </div>
 
-<a href="/edit/{{ .Recipe.ID.Int64 }}"><input type="button" value="Edit" /></a>
+  <div id="instructions">
+    <h2>Instructions</h2>
+    {{ range (.Recipe.Instructions.String | splitLines) }}
+    <p>{{ . }}</p>
+    {{ end }}
+  </div>
+</div>
+
+<script>
+  window.syncSrolls("#ingredient-instruction-container", "#ingredients");
+</script>
+
 {{ end }}
