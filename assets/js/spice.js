@@ -18,6 +18,19 @@ function setImageSrc(el, imgID, fallback) {
 
 window.setImageSrc = setImageSrc;
 
+// focus search
+function slashToFocus(el) {
+  window.addEventListener("keydown", (e) => {
+    if (document.activeElement === el) return;
+    if (e.code === "Slash") {
+      el.focus();
+      e.preventDefault();
+    }
+  });
+}
+
+window.slashToFocus = slashToFocus;
+
 // nice
 if ("scrollRestoration" in history) {
   history.scrollRestoration = "auto";

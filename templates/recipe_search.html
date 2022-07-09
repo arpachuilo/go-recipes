@@ -3,6 +3,7 @@
 <form id="filter" autocomplete="off" action="/" method="get">
   <div style="display: flex">
     <input
+      id="search"
       name="search"
       value="{{ .Search }}"
       type="search"
@@ -19,6 +20,10 @@
       hx-include="[name='tags']"
     />
     <input type="submit" value="Search" style="margin-left: 0.5rem" />
+
+    <script>
+      window.slashToFocus(document.getElementById("search"));
+    </script>
   </div>
 
   <div class="chip-container">
