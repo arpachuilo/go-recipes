@@ -898,12 +898,14 @@ input.chip[type="checkbox"] {
   }
 
   #ingredients {
+    overflow-y: auto;
     height: fit-content;
     transition: margin-top 133ms ease-out;
     top: 0;
   }
 
   #instructions {
+    overflow-y: auto;
     height: fit-content;
   }
 }
