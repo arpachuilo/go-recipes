@@ -805,7 +805,7 @@ div.chip-container {
   font-size: 1em;
   align-items: baseline;
   margin-top: 0.5em;
-  overflow-x: scroll;
+  overflow-x: auto;
 }
 
 div.chip-container div.chip:nth-of-type(1) {
