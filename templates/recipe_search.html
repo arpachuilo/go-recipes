@@ -57,10 +57,5 @@
   </div>
 </form>
 
-<div
-  id="search-results"
-  style="display: flex; flex-wrap: wrap; align-self: center; width: 100%"
->
-  {{ template "fragment" . }}
-</div>
+<div id="search-results" class="figure-grid">{{ template "fragment" . }}</div>
 {{ end }}

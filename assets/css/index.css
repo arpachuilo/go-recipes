@@ -81,6 +81,7 @@ body article {
 body main {
   padding: 0;
 }
+
 @media (min-width: 768px) {
   body main {
     padding: 0.1rem 1.2rem 2rem 1.2rem;
@@ -90,8 +91,17 @@ body main {
 body header > *,
 body footer > *,
 body main > * {
-  max-width: 50rem;
+  /* max-width: 50rem; */
   margin: 0 auto;
+}
+
+@media (min-width: 1200px) {
+  body header > *,
+  body footer > *,
+  body main > * {
+    max-width: 1320px;
+    margin: 0 auto;
+  }
 }
 
 body main > * {
@@ -318,6 +328,12 @@ nav li {
 }
 
 /* CARDS */
+.figure-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 50%);
+  width: 100%;
+}
+
 figure img {
   max-height: 8rem;
   max-width: 100%;
@@ -326,8 +342,7 @@ figure img {
 }
 
 figure {
-  flex-basis: 100%;
-  margin: 1em;
+  margin: 0.2em;
   border-radius: var(--border-radius);
 
   display: flex;
@@ -343,16 +358,15 @@ figure.figure-full img {
   max-height: 10rem;
 }
 
-@media (min-width: 360px) {
-  figure {
-    flex-basis: calc(50% - 3em);
-  }
-}
-
 @media (min-width: 768px) {
-  figure {
-    flex-basis: calc(33% - 2em);
+  .figure-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   }
+
+  figure {
+    margin: 1em;
+  }
+
   figure.figure-full > a {
     flex-direction: row;
   }
@@ -888,23 +902,25 @@ input.chip[type="checkbox"] {
   width: 100%;
 }
 
-@media (min-width: 480px) {
+@media (min-width: 576px) {
   #ingredient-instruction-container {
     display: flex;
     white-space: normal;
     height: fit-content;
-    grid-template-columns: 1fr 1fr;
     overflow-x: unset;
   }
 
   #ingredients {
+    max-width: 30ch;
     overflow-y: auto;
     height: fit-content;
     transition: margin-top 133ms ease-out;
+    margin-right: 0.5em;
     top: 0;
   }
 
   #instructions {
+    max-width: 60ch;
     overflow-y: auto;
     height: fit-content;
   }
