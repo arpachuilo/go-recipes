@@ -17,9 +17,9 @@
       hx-trigger="keyup changed delay:300ms"
       hx-target="#search-results"
       hx-push-url="true"
-      hx-include="[name='tags']"
+      hx-include="[name='tags'], [name='limit]"
     />
-    <input type="submit" value="Search" style="margin-left: 0.5rem" />
+    <input type="submit" value="🔍" style="margin-left: 0.5rem" />
 
     <script>
       window.slashToFocus(document.getElementById("search"));
@@ -49,13 +49,13 @@
         hx-trigger="click"
         hx-target="#search-results"
         hx-push-url="true"
-        hx-include="[name='tags'], [name='search']"
+        hx-include="[name='tags'], [name='search'], [name='limit']"
       />
       <label for="tag-{{ $i }}" class="chip"> {{ $t.Tag.String }} </label>
     </div>
     {{ end }}
   </div>
-</form>
 
-<div id="search-results" class="figure-grid">{{ template "fragment" . }}</div>
+  <div id="search-results" class="figure-grid">{{ template "fragment" . }}</div>
+</form>
 {{ end }}

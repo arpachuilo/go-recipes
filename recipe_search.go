@@ -66,11 +66,16 @@ func (self App) ServeSearch() registerable.Registration {
 			}
 
 			// get limit
+			limitParam := c.QueryParam("limit")
 			limit := 15
-			if value := c.QueryParam("limit"); value != "" {
-				if value, err := strconv.Atoi(value); err == nil {
-					limit = value
+			if limitParam == "auto" || limitParam == "" {
+				if cookie, err := c.Cookie("search_limit"); err == nil {
+					limitParam = cookie.Value
 				}
+			}
+
+			if value, err := strconv.Atoi(limitParam); err == nil {
+				limit = value
 			}
 
 			// check if this is an htmlx request
