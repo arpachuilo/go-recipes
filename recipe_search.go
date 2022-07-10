@@ -156,6 +156,8 @@ func (self App) ServeSearch() registerable.Registration {
 			// get tags
 			queryTags := models.Tags(
 				Distinct("tag"),
+				GroupBy("tag"),
+				OrderBy("count(tag) desc"),
 			)
 
 			possibleTags, err := queryTags.All(ctx, tx)

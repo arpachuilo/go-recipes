@@ -37,9 +37,7 @@ type Config struct {
 	Mailer   MailerConfig   `mapstructure:"mailer"`
 }
 
-// TODO: Support for list view along side the grid view for search results
 // TODO: Look into impromvements to prevent multiple db reads on image serving
-// TODO: Look into using sass
 // TODO: Look into template context to set/unset nav
 // TODO: Look into clustering recipe data (assign most relevant emoji maybe even?)
 func main() {
