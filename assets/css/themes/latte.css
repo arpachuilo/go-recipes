@@ -51,3 +51,39 @@
   --border-radius: 0px;
   --arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 2'%3E%3Cpath fill='rgba(0,0,0,0.7)' fill-rule='nonzero' d='M1.5 2L3 0H0z'/%3E%3C/svg%3E");
 }
+
+.nib{
+    fill:#f2d8b8;
+}
+.blade{
+    fill:#e6e9ef;
+}
+.pen{
+    fill:#a27c91;
+}
+.j{
+    stroke-width:.5px;
+}
+.j,.k{
+    stroke:#000;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+}
+.j,.k,.l{
+    fill:none;
+}
+.handle{
+    fill:#91a28c;
+}
+.n{
+    clip-path:url(#e);
+}
+.o{
+    clip-path:url(#f);
+}
+.p{
+    fill:#000102;
+}
+.ring{
+    fill:#8c94a2;
+}
