@@ -52,38 +52,41 @@
   --arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 2'%3E%3Cpath fill='rgba(0,0,0,0.7)' fill-rule='nonzero' d='M1.5 2L3 0H0z'/%3E%3C/svg%3E");
 }
 
-.nib{
-    fill:#F2D8B8;
+.nib {
+  fill: #f2d8b8;
 }
-.blade{
-    fill:#e6e9ef;
+.blade {
+  fill: #e6e9ef;
 }
-.pen{
-    fill:#814A5D;
+.pen {
+  fill: #814a5d;
 }
-.j{
-    stroke-width:.5px;
+.j {
+  stroke-width: 0.5px;
 }
-.j,.k{
-    stroke:#000;
-    stroke-linecap:round;
-    stroke-linejoin:round;
+.j,
+.k {
+  stroke: #000;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
-.j,.k,.l{
-    fill:none;
+.j,
+.k,
+.l {
+  fill: none;
 }
-.handle{
-    fill:#788170;
+.handle {
+  fill: #788170;
 }
-.n{
-    clip-path:url(#e);
+.n {
+  clip-path: url(#e);
 }
-.o{
-    clip-path:url(#f);
+.o {
+  clip-path: url(#f);
 }
-.p{
-    fill:#000102;
+.p {
+  fill: #000102;
 }
-.ring{
-    fill:#4A5381;
+.ring {
+  fill: #4a5381;
 }

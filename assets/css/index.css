@@ -40,6 +40,24 @@ html {
   background: var(--link-hover);
 }
 
+/* logo */
+.nav-logo {
+  flex-grow: 1;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  font-family: monospace;
+}
+
+.logo {
+  margin-top: 1em;
+  margin-right: 0.2em;
+  width: 3em;
+}
+
 /* body */
 body {
   margin: 0;
@@ -49,6 +67,7 @@ body {
   flex-direction: column;
   height: 100vh;
 }
+
 @media (min-width: 20rem) {
   body {
     font-size: calc(1rem + 0.00625 * (100vw - 20rem));
@@ -83,8 +102,10 @@ body main {
 }
 
 @media (min-width: 768px) {
+  body header > *,
+  body footer > *,
   body main {
-    padding: 0.1rem 1.2rem 2rem 1.2rem;
+    padding: 0 1rem;
   }
 }
 
@@ -96,8 +117,8 @@ body main > * {
 }
 
 @media (min-width: 1200px) {
-  body header > *,
-  body footer > *,
+  body header,
+  body footer,
   body main > * {
     max-width: 1320px;
     margin: 0 auto;
@@ -109,12 +130,16 @@ body main > * {
 }
 
 body > header {
+  width: 100%;
+  padding-bottom: 0;
   margin-bottom: 1.5em;
-  padding: 0 1.2rem 0 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 body > header h1 {
-  padding-top: 1.2em;
+  /* padding-top: 1.2em; */
   font-size: 1.5em;
 }
 
