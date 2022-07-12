@@ -20,8 +20,8 @@ type SearchTemplate struct {
 	PossibleTags models.TagSlice
 	SelectedTags []string
 	Search       string
-	Offset       int
-	Offsets      []int
+	Page         int
+	Pages        []int
 	Limit        string
 }
 
@@ -58,17 +58,17 @@ func (self App) ServeSearch() registerable.Registration {
 				tags = keys
 			}
 
-			// get offset
-			offset := 0
-			if value := c.QueryParam("offset"); value != "" {
+			// getpage
+			page := 0
+			if value := c.QueryParam("page"); value != "" {
 				if value, err := strconv.Atoi(value); err == nil {
-					offset = value
+					page = value
 				}
 			}
 
 			// get limit
-			limitParam := c.QueryParam("limit")
 			limit := 15
+			limitParam := c.QueryParam("limit")
 			if limitParam == "auto" || limitParam == "" {
 				if cookie, err := c.Cookie("search_limit"); err == nil {
 					limitParam = cookie.Value
@@ -113,7 +113,7 @@ func (self App) ServeSearch() registerable.Registration {
 				where,
 				OrderBy("title", "recipes.id"),
 				Limit(limit),
-				Offset(offset),
+				Offset(page*limit),
 				GroupBy("recipes.id"),
 				Having("count(distinct t.id) >= ?", len(tags)),
 			)
@@ -145,12 +145,11 @@ func (self App) ServeSearch() registerable.Registration {
 			}
 
 			// generate pages
-			offsets := make([]int, 0)
-			pages := (int(count) + limit - 1) / limit
-
-			if pages > 1 {
-				for i := 0; i < pages; i++ {
-					offsets = append(offsets, i*limit)
+			pages := make([]int, 0)
+			numPages := (int(count) + limit - 1) / limit
+			if numPages > 1 {
+				for i := 0; i < numPages; i++ {
+					pages = append(pages, i)
 				}
 			}
 
@@ -173,9 +172,9 @@ func (self App) ServeSearch() registerable.Registration {
 				Recipes:      recipes,
 				PossibleTags: possibleTags,
 				SelectedTags: tags,
-				Offset:       offset,
-				Offsets:      offsets,
-				Limit:        limitParam,
+				Page:         page,
+				Pages:        pages,
+				Limit:        c.QueryParam("limit"),
 			}
 
 			if htmx {

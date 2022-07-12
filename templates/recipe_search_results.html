@@ -38,11 +38,11 @@
 >
   <nav>
     <ul>
-      {{ $search := .Search }}{{ $offset := .Offset }} {{ range $i, $o :=
-      .Offsets }}
+      {{ $search := .Search }}{{ $page := .Page }}{{ $limit := .Limit }}
+      {{ range $i, $o := .Pages }}
       <li>
-        {{ if ne $o $offset }}
-        <a href="/?search={{ $search }}&offset={{ $o }}">{{ inc $i }}</a>
+        {{ if ne $o $page }}
+        <a href="/?search={{ $search }}&page={{ $o }}{{ if ne $limit "" }}&limit={{ $limit }}{{ end }}">{{ inc $i }}</a>
         {{ else }} {{ inc $i }} {{ end }}
       </li>
       {{ end }}
