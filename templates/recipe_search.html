@@ -17,10 +17,11 @@
       hx-trigger="keyup changed delay:467ms"
       hx-target="#search-results"
       hx-push-url="true"
-      hx-include="[name='tags'], [name='limit]"
+      hx-include="[name='tags'], [name='limit']"
     />
     <input type="submit" value="🔍" style="margin-left: 0.5rem" />
 
+    <script type="text/javascript" src="/static/js/search.js"></script>
     <script>
       window.slashToFocus(document.getElementById("search"));
     </script>

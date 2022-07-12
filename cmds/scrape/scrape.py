@@ -13,18 +13,21 @@ db = sys.argv[1]
 url = sys.argv[2]
 
 # scrape
-scraper = scrape_me(url, wild_mode = True)
+scraper = scrape_me(url, wild_mode=True)
 
 # open db
 con = sqlite3.connect(db)
 cur = con.cursor()
 
 # make tables
-cur.execute('''
+cur.execute(
+    """
     create table if not exists recipes
-    (id integer primary key autoincrement, url text unique, title text, instructions text, author text, total_time int, yields text, serving_size text, calories text, image blob, path text unique)''')
+    (id integer primary key autoincrement, url text unique, title text, instructions text, author text, total_time int, yields text, serving_size text, calories text, image blob, path text unique)"""
+)
 
-cur.execute('''
+cur.execute(
+    """
 create trigger if not exists idtopath
 after insert on recipes 
 begin
@@ -37,15 +40,20 @@ begin
   )
   where id = new.id;
 end
-''')
+"""
+)
 
-cur.execute('''
+cur.execute(
+    """
     create table if not exists ingredients
-    (id integer primary key, recipeid int REFERENCES recipes(id), ingredient text)''')
+    (id integer primary key, recipeid int REFERENCES recipes(id), ingredient text)"""
+)
 
-cur.execute('''
+cur.execute(
+    """
     create table if not exists tags 
-    (id integer primary key, recipeid int REFERENCES recipes(id), tag text)''')
+    (id integer primary key, recipeid int REFERENCES recipes(id), tag text)"""
+)
 
 # generate base64 thumbnail
 image = scraper.image()
@@ -68,18 +76,18 @@ except:
 
 # dump to db
 recipe = (
-        None,
-        scraper.canonical_url(),
-        scraper.title(), 
-        scraper.instructions(),
-        str(scraper.author()),
-        scraper.total_time(),
-        yields,
-        scraper.nutrients().get('servingSize'),
-        scraper.nutrients().get('calories'),
-        image,
-        None,
-    )
+    None,
+    scraper.canonical_url(),
+    scraper.title(),
+    scraper.instructions(),
+    str(scraper.author()),
+    scraper.total_time(),
+    yields,
+    scraper.nutrients().get("servingSize"),
+    scraper.nutrients().get("calories"),
+    image,
+    None,
+)
 
 cur.execute("insert into recipes values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", recipe)
 

@@ -37,7 +37,13 @@ let color = localStorage.getItem("theme-base") || "#1e2030;";
 setTheme(theme);
 setThemeMeta(color);
 
+// set theme
 window.onload = () => {
   let selector = document.getElementById("theme-select");
   selector.value = theme;
 };
+
+// good scroll restore
+if ("scrollRestoration" in history) {
+  history.scrollRestoration = "auto";
+}

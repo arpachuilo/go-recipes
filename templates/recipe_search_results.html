@@ -62,10 +62,12 @@
       hx-push-url="true"
       hx-include="[name='tags'], [name='search']"
     >
-      <option value="15">15</option>
-      <option value="25">25</option>
-      <option value="50">50</option>
-      <option value="auto">auto</option>
+      <option {{ if eq .Limit "15" }}selected{{ end }} value="15">15</option>
+      <option {{ if eq .Limit "25" }}selected{{ end }} value="25">25</option>
+      <option {{ if eq .Limit "50" }}selected{{ end }} value="50">50</option>
+      <option {{ if eq .Limit "auto" }}selected{{ end }} value="auto">
+        auto
+      </option>
     </select>
   </div>
 </div>

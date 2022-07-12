@@ -22,6 +22,7 @@ type SearchTemplate struct {
 	Search       string
 	Offset       int
 	Offsets      []int
+	Limit        string
 }
 
 func (self App) ServeSearch() registerable.Registration {
@@ -174,6 +175,7 @@ func (self App) ServeSearch() registerable.Registration {
 				SelectedTags: tags,
 				Offset:       offset,
 				Offsets:      offsets,
+				Limit:        limitParam,
 			}
 
 			if htmx {
