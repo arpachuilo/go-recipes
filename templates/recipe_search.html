@@ -27,6 +27,19 @@
     </script>
   </div>
 
+  <style>
+    figure {
+      transition: opacity 333ms ease-out;
+    }
+    figure.htmx-added {
+      opacity: 0;
+    }
+
+    figure.htmx-swapping {
+      opacity: 0;
+    }
+  </style>
+
   <div class="chip-container">
     {{ $st := .SelectedTags }} {{ range $i, $t := .PossibleTags }}
     <div class="chip">
