@@ -25,6 +25,8 @@ function setTheme(theme) {
     );
     localStorage.setItem("theme-base", color);
     setThemeMeta(color);
+    let el = document.getElementById("theme-select");
+    el.value = theme;
   }, 33);
 }
 

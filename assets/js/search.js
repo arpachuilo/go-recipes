@@ -30,7 +30,6 @@ window.onload = function () {
   const params = Object.fromEntries(urlSearchParams.entries());
   let el = document.getElementById("limit");
   if ("limit" in params) {
-    console.log(params.limit);
     el.value = params.limit;
   } else {
     if (document.cookie.match(/^(.*;)?\s*search_limit\s*=\s*[^;]+(.*)?$/)) {
