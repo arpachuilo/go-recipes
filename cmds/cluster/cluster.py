@@ -13,12 +13,13 @@ cur.execute(
     """
     select r.id, r.title, t.tag, i.ingredient
     from recipes r
-    inner join tags t on r.id = t.recipeid
     inner join ingredients i on r.id = i.recipeid
+    left join tags t on r.id = t.recipeid
     """
 )
 
 rows = cur.fetchall()
+cur.close()
 
 ### Data Cleanup
 from nltk.corpus import stopwords
@@ -201,7 +202,7 @@ communities = community.greedy_modularity_communities(g)
 ### Visualization
 # https://melaniewalsh.github.io/Intro-Cultural-Analytics/06-Network-Analysis/00-Network-Analysis.html
 from bokeh.transform import linear_cmap
-from bokeh.io import show, curdoc
+from bokeh.io import output_file, save, show, curdoc
 from bokeh.themes import built_in_themes
 from bokeh.models import (
     Range1d,
@@ -217,6 +218,7 @@ from bokeh.plotting import from_networkx
 from bokeh.palettes import Viridis8
 
 # title
+output_file(sys.argv[3])
 curdoc().theme = "light_minimal"
 title = "Recipes Visualization"
 
@@ -336,4 +338,5 @@ hover.tooltips = toolips
 # layout
 column(plot, sizing_mode="stretch_both")
 
-show(plot)
+# show(plot)
+save(plot)

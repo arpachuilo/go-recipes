@@ -122,15 +122,22 @@ func NewApp(conf *Config) *App {
 	// image etags
 	imageEtags := NewETags[int64]()
 
+	// new clustering
+	rc := NewRecipeCluster(conf.Database.Path, conf.Server.AssetsDir+"/cluster.html", 5)
+
 	// hook into etags invalidation
-	invalidate := func(ctx context.Context, exec boil.ContextExecutor, r *models.Recipe) error {
+	hook := func(ctx context.Context, exec boil.ContextExecutor, r *models.Recipe) error {
+		// invalidate tag
 		imageEtags.InvalidateByID(r.ID.Int64)
+
+		// cluster
+		rc.Run()
 		return nil
 	}
 
-	models.AddRecipeHook(boil.AfterInsertHook, invalidate)
-	models.AddRecipeHook(boil.AfterUpdateHook, invalidate)
-	models.AddRecipeHook(boil.AfterDeleteHook, invalidate)
+	models.AddRecipeHook(boil.AfterInsertHook, hook)
+	models.AddRecipeHook(boil.AfterUpdateHook, hook)
+	models.AddRecipeHook(boil.AfterDeleteHook, hook)
 
 	h := &App{
 		Echo:             e,
