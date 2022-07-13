@@ -27,15 +27,7 @@
   </a>
 </figure>
 {{ end }}
-<div
-  id="pagination"
-  style="
-    grid-column: 1 / -1;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  "
->
+<div id="pagination" style="grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center;">
   <nav>
     <ul>
       {{ $search := .Search }}{{ $page := .Page }}{{ $limit := .Limit }}
@@ -50,9 +42,7 @@
   </nav>
 
   <div style="display: flex; flex-direction: column">
-    <label for="limit" style="margin-left: 0.2em; font-size: 0.8rem"
-      >Limit</label
-    >
+    <label for="limit" style="margin-left: 0.2em; font-size: 0.8rem">Limit</label>
     <select
       name="limit"
       id="limit"
