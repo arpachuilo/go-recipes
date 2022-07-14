@@ -29,17 +29,17 @@ func (self App) ServeSearch() registerable.Registration {
 	// read templates dynamically for debug
 	tmplFullName := "recipe_search_results"
 	fullTemplate := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
-		"templates/base.html",
-		"templates/nav.html",
-		"templates/recipe_search.html",
-		"templates/recipe_search_results.html",
+		"templates/base.gohtml",
+		"templates/nav.gohtml",
+		"templates/recipe_search.gohtml",
+		"templates/recipe_search_results.gohtml",
 	))
 
 	self.TemplateRenderer.Add(tmplFullName, fullTemplate)
 
 	tmplFragName := "recipe_search_results_partial"
 	fragTemplate := template.Must(template.New("fragment").Funcs(templateFns).ParseFiles(
-		"templates/recipe_search_results.html",
+		"templates/recipe_search_results.gohtml",
 	))
 
 	self.TemplateRenderer.Add(tmplFragName, fragTemplate)

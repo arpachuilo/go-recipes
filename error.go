@@ -16,9 +16,9 @@ func New500Handle(tr *TemplateRenderer) *FiveHundredHandler {
 	// read templates dynamically for debug
 	tmplName := "error"
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
-		"templates/base.html",
-		"templates/nav.html",
-		"templates/error.html",
+		"templates/base.gohtml",
+		"templates/nav.gohtml",
+		"templates/error.gohtml",
 	))
 
 	tr.Add(tmplName, tmpl)

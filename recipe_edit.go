@@ -34,9 +34,9 @@ func (self App) ServeEditRecipe() registerable.Registration {
 	// read templates dynamically for debug
 	tmplName := "recipe_edit"
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
-		"templates/base.html",
-		"templates/nav.html",
-		"templates/recipe_edit.html",
+		"templates/base.gohtml",
+		"templates/nav.gohtml",
+		"templates/recipe_edit.gohtml",
 	))
 
 	self.TemplateRenderer.Add(tmplName, tmpl)

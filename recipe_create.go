@@ -27,9 +27,9 @@ type CreateTemplate struct {
 func (self App) ServeCreateRecipe() registerable.Registration {
 	tmplName := "recipe_create"
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
-		"templates/base.html",
-		"templates/nav.html",
-		"templates/recipe_create.html",
+		"templates/base.gohtml",
+		"templates/nav.gohtml",
+		"templates/recipe_create.gohtml",
 	))
 
 	self.TemplateRenderer.Add(tmplName, tmpl)

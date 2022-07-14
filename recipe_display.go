@@ -25,9 +25,9 @@ func (self App) ServeRecipeDisplay() registerable.Registration {
 	// read templates dynamically for debug
 	tmplName := "recipe_display"
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
-		"templates/base.html",
-		"templates/nav.html",
-		"templates/recipe_display.html",
+		"templates/base.gohtml",
+		"templates/nav.gohtml",
+		"templates/recipe_display.gohtml",
 	))
 
 	self.TemplateRenderer.Add(tmplName, tmpl)

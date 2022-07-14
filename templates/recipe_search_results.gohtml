@@ -1,4 +1,5 @@
-{{ define "fragment" }} {{ range .Recipes }}
+{{ define "fragment" }}
+{{ range .Recipes }}
 <figure id="recipe-{{ .ID.Int64 }}" htmx-swap="outerHTML swap:333ms">
   <a
     style="flex-direction:: row; width: 100%;"
@@ -61,5 +62,4 @@
     </select>
   </div>
 </div>
-
 {{ end }}

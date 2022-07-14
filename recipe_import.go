@@ -22,9 +22,9 @@ func (self App) ServeRecipeImport() registerable.Registration {
 	// read templates dynamically for debug
 	tmplName := "recipe_import"
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
-		"templates/base.html",
-		"templates/nav.html",
-		"templates/recipe_import.html",
+		"templates/base.gohtml",
+		"templates/nav.gohtml",
+		"templates/recipe_import.gohtml",
 	))
 
 	self.TemplateRenderer.Add(tmplName, tmpl)

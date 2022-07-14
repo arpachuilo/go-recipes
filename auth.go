@@ -81,9 +81,9 @@ func (self App) ServeLogin() registerable.Registration {
 	// read templates dynamically for debug
 	tmplName := "login"
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
-		"templates/base.html",
-		"templates/empty_nav.html",
-		"templates/login.html",
+		"templates/base.gohtml",
+		"templates/empty_nav.gohtml",
+		"templates/login.gohtml",
 	))
 
 	self.TemplateRenderer.Add(tmplName, tmpl)
@@ -112,7 +112,7 @@ type MagicLinkTemplate struct {
 func (self App) SendLink() registerable.Registration {
 	tmplName := "magic_link"
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
-		"templates/magic_link.html",
+		"templates/magic_link.gohtml",
 	))
 
 	self.TemplateRenderer.Add(tmplName, tmpl)
@@ -192,9 +192,9 @@ func (self App) SendLink() registerable.Registration {
 func (self App) ServeLinkSent() registerable.Registration {
 	tmplName := "link_sent"
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
-		"templates/base.html",
-		"templates/empty_nav.html",
-		"templates/link_sent.html",
+		"templates/base.gohtml",
+		"templates/empty_nav.gohtml",
+		"templates/link_sent.gohtml",
 	))
 
 	self.TemplateRenderer.Add(tmplName, tmpl)

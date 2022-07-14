@@ -22,96 +22,35 @@ rows = cur.fetchall()
 cur.close()
 
 ### Data Cleanup
+from nltk import pos_tag
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 
 # helpers for removing things
 only_alpha = re.compile("[^a-zA-Z\\s]")
 
-# https://en.wikipedia.org/wiki/Cooking_weights_and_measures
-measures = [
-    # measures
-    "drop",
-    "dr",
-    "gt",
-    "gtt",
-    "smidgen" "smdg",
-    "smi",
-    "gtt",
-    "ds",
-    "pinch",
-    "pn" "dash",
-    'ds",' "saltspoon",
-    "scruple",
-    "ssp",
-    "coffeespoon",
-    "csp",
-    "dram",
-    "fluid",
-    "fl" "dr",
-    "teaspoon",
-    "tsp",
-    "t",
-    "dessertspoon",
-    "dsp",
-    "dssp",
-    "dstspon",
-    "tablespoon",
-    "tbsp",
-    "ounce",
-    "oz",
-    "wineglass",
-    "wgf",
-    "gill",
-    "teacup",
-    "tcf",
-    "cup",
-    "c",
-    "pint",
-    "pt",
-    "quart",
-    "qt",
-    "gallon",
-    "gal",
-]
-
-special_instructions = [
-    "firm",
-    "firmly",
-    "light",
-    "lightly",
-    "packed",
-    "even",
-    "level",
-    "round",
-    "rounded",
-    "heap",
-    "heaping",
-    "heaped",
-    "sifted",
-    "sift",
-    "scoop",
-    "whole",
-]
-
-common_ingredients = ["salt", "pepper", "water", "oil"]
-
 # pluralize
 def pluralize(words):
     return [w + "s" for w in words] + [w + "es" for w in words]
 
 
-special_instructions += pluralize(special_instructions)
-measures += pluralize(measures)
-common_ingredients += pluralize(common_ingredients)
+# special_instructions += pluralize(special_instructions)
+# measures += pluralize(measures)
+# common_ingredients += pluralize(common_ingredients)
+custom_stopwords = set(
+    [
+        w
+        for w in open("custom_stopwords.txt").read().split("\n")
+        if not w.startswith("#") and not w.isspace() and not w == ""
+    ]
+)
 
 # expand stop words here (e.g. measurments and common ingredients (minced, etc))
 # look into collecting existing lists
 stop_words = (
     set(stopwords.words("english"))
-    | set(special_instructions)
-    | set(measures)
-    | set(common_ingredients)
+    | set(custom_stopwords)
+    | set(pluralize(custom_stopwords))
 )
 
 # create results to work with
@@ -128,8 +67,12 @@ for [id, title, tag, ingredient] in rows:
         | set(
             [
                 w
-                for w in word_tokenize(only_alpha.sub("", ingredient).lower())
-                if not w in stop_words and len(w) > 2
+                for w, pos in pos_tag(
+                    word_tokenize(only_alpha.sub(" ", ingredient).lower())
+                )
+                if not w in stop_words
+                and len(w) > 2
+                and (pos == "NN" or pos == "NNP" or pos == "NNS" or pos == "NNPS")
             ]
         ),
     }

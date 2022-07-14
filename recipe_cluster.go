@@ -60,10 +60,10 @@ func (self App) ServeCluster() registerable.Registration {
 	// read templates dynamically for debug
 	tmplFullName := "recipe_clustering"
 	fullTemplate := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
-		"templates/base.html",
-		"templates/nav.html",
-		"templates/recipe_search.html",
-		"templates/recipe_cluster.html",
+		"templates/base.gohtml",
+		"templates/nav.gohtml",
+		"templates/recipe_search.gohtml",
+		"templates/recipe_cluster.gohtml",
 	))
 
 	self.TemplateRenderer.Add(tmplFullName, fullTemplate)
