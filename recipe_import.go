@@ -67,7 +67,13 @@ func (self App) ImportRecipe() registerable.Registration {
 				// get url to import
 				importURL := c.FormValue("url")
 				if importURL == "" {
-					return "", fmt.Errorf("%v", "not url provided")
+					// check text field for pwa
+					textField := c.FormValue("text")
+					if textField != "" {
+						importURL = textField
+					} else {
+						return "", fmt.Errorf("%v", "no url provided")
+					}
 				}
 
 				// scrape url
