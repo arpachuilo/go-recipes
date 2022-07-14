@@ -1,6 +1,7 @@
 import sqlite3
 import sys
 import re
+import os
 
 ### Reading Data
 # open db
@@ -37,10 +38,15 @@ def pluralize(words):
 # special_instructions += pluralize(special_instructions)
 # measures += pluralize(measures)
 # common_ingredients += pluralize(common_ingredients)
+
+custom_stopwords_filepath = os.path.join(
+    os.path.dirname(__file__), "custom_stopwords.txt"
+)
+
 custom_stopwords = set(
     [
         w
-        for w in open("custom_stopwords.txt").read().split("\n")
+        for w in open(custom_stopwords_filepath).read().split("\n")
         if not w.startswith("#") and not w.isspace() and not w == ""
     ]
 )
