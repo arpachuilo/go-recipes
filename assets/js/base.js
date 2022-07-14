@@ -68,6 +68,14 @@ const registerServiceWorker = async () => {
       } else if (registration.active) {
         console.log("Service worker active");
       }
+
+      // After the initial load, force a service worker update check each time
+      // our web app is hidden and then brought back to the foreground.
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+          registration.update();
+        }
+      });
     } catch (error) {
       console.error(`Registration failed with ${error}`);
     }
