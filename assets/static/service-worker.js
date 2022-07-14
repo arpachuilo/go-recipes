@@ -1,23 +1,6 @@
 const CACHE_NAME = "offline";
 const OFFLINE_URL = "offline.html";
 
-self.addEventListener("share", function (event) {
-  if (event.data.url === undefined) throw new Error("Did not contain URL.");
-
-  event.waitUntil(
-    (async () => {
-      const data = new FormData();
-      data.append("url", event.data.url);
-
-      const networkResponse = await fetch("/import", {
-        method: "POST",
-        body: data,
-      });
-      return networkResponse;
-    })()
-  );
-});
-
 self.addEventListener("install", function (event) {
   console.log("[ServiceWorker] Install");
 
