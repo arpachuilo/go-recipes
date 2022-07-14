@@ -7,44 +7,47 @@
     <link
       rel="apple-touch-icon"
       sizes="180x180"
-      href="/static/icons/apple-touch-icon.png"
+      href="/icons/apple-touch-icon.png"
     />
     <link
       rel="icon"
       type="image/png"
       sizes="32x32"
-      href="/static/icons/favicon-32x32.png"
+      href="/icons/favicon-32x32.png"
     />
     <link
       rel="icon"
       type="image/png"
       sizes="16x16"
-      href="/static/icons/favicon-16x16.png"
+      href="/icons/favicon-16x16.png"
     />
+
+    <link rel="manifest" href="/manifest.json">
 
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#1e2030;" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#e6e9ef">
+    <meta name="theme-color" media="(prefers-color-scheme: dark)"  content="#1e2030">
 
     <!-- CSS for users with dark mode -->
     <link
       rel="stylesheet"
-      href="/static/css/themes/macchiato.css"
+      href="/css/themes/macchiato.css"
       media="(prefers-color-scheme: no-preference), (prefers-color-scheme: dark)"
     />
 
     <!-- CSS for users without dark mode -->
     <link
       rel="stylesheet"
-      href="/static/css/themes/latte.css"
+      href="/css/themes/latte.css"
       media="(prefers-color-scheme: light)"
     />
 
-    <link rel="stylesheet" href="/static/css/index.css" />
+    <link rel="stylesheet" href="/css/index.css" />
 
-    <script type="text/javascript" src="/static/js/base.js"></script>
+    <script type="text/javascript" src="/js/base.js"></script>
+    <script src="/js/htmx.js" defer></script>
 
-    <script src="/static/js/htmx.js" defer></script>
   </head>
 
   <body>
@@ -193,10 +196,10 @@
           >Theme</label
         >
         <select id="theme-select" onchange="setTheme(this.value)">
-          <option value="/static/css/themes/latte.css">latte</option>
-          <option value="/static/css/themes/frappe.css">frappe</option>
-          <option value="/static/css/themes/macchiato.css">macchiato</option>
-          <option value="/static/css/themes/mocha.css">mocha</option>
+          <option value="/css/themes/latte.css">latte</option>
+          <option value="/css/themes/frappe.css">frappe</option>
+          <option value="/css/themes/macchiato.css">macchiato</option>
+          <option value="/css/themes/mocha.css">mocha</option>
         </select>
       </div>
     </header>

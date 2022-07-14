@@ -1,0 +1,50 @@
+{
+  "short_name": "Culinary Hub",
+  "name": "CulinaryHub: your community cookbook",
+  "icons": [
+    {
+      "src": "/icons/apple-touch-icon.png",
+      "type": "image/png",
+      "sizes": "180x180"
+    },
+    {
+      "src": "/icons/favicon-32x32.png",
+      "type": "image/png",
+      "sizes": "32x32"
+    },
+    {
+      "src": "/icons/favicon-16x16.png",
+      "type": "image/png",
+      "sizes": "16x16"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#303446",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#303446",
+  "shortcuts": [
+    {
+      "name": "Import",
+      "short_name": "Import Recipe",
+      "description": "Import a new recipe",
+      "url": "/import"
+    },
+    {
+      "name": "Create",
+      "short_name": "Create Recipe",
+      "description": "Create a new recipe",
+      "url": "/create"
+    }
+  ],
+  "share_target": {
+    "action": "/import",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "url": "link"
+    }
+  },
+  "description": "Community recipe storage",
+  "screenshots": []
+}

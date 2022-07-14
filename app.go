@@ -105,7 +105,7 @@ func NewApp(conf *Config) *App {
 	e.HTTPErrorHandler = New500Handle(tr).errorHandler
 
 	// setup static
-	e.Static("/static", conf.Server.AssetsDir)
+	e.Static("/", conf.Server.AssetsDir)
 
 	// open db
 	db, err := sql.Open("sqlite3", conf.Database.Path)
