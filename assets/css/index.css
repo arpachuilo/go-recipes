@@ -101,6 +101,14 @@ body main {
   padding: 0;
 }
 
+body header > *:first-child {
+  padding-left: 1em;
+}
+
+body header > *:last-child {
+  padding-right: 1em;
+}
+
 @media (min-width: 768px) {
   body header > *,
   body footer > *,
