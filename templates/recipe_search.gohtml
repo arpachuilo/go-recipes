@@ -41,16 +41,9 @@
     {{ $st := .SelectedTags }} {{ range $i, $t := .PossibleTags }}
     <div class="chip">
       <input
-        {{
-        if
-        hasTag
-        $t
-        $st
-        }}
+        {{ if hasTag $t $st }}
         checked
-        {{
-        end
-        }}
+        {{ end }}
         class="chip"
         id="tag-{{ $i }}"
         type="checkbox"

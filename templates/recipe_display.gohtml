@@ -4,8 +4,7 @@
   <a
     style="width: 100%"
     target="_blank"
-    rel="”noopener"
-    noreferrer”
+    rel="noopener noreferrer"
     href="{{ .Recipe.URL.String }}"
   >
     <div style="display: flex; position: relative; z-index: 1">
@@ -46,32 +45,85 @@
 </figure>
 
 <div
-  style="display: flex; justify-content: space-between; align-items: flex-end"
+  style="display: flex; justify-content: space-between; align-items: center; margin: 1em;"
 >
   {{ if .Tags }}
-  <div>
-    <h6>Tags</h6>
-    <p>{{ .Tags | flattenTags }}</p>
+   <div style="display: flex; flex-direction: column;">
+      <h6>Tags</h6>
+      <div class="chip-container">
+       {{ range $i, $t := .Tags }}
+         <div class="chip">
+         <input
+           disabled 
+           class="chip"
+           id="tag-{{ $i }}"
+           type="checkbox"
+           name="tags"
+           value="{{ $t.Tag.String }}"
+           hx-get="/"
+           hx-trigger="click"
+           hx-target="#search-results"
+           hx-push-url="true"
+           hx-include="[name='tags'], [name='search'], [name='limit']"
+         />
+         <label for="tag-{{ $i }}" class="chip"> {{ $t.Tag.String }} </label>
+       </div>
+       {{ end }}
+     </div>
   </div>
   {{ end }}
 
-  <a href="/edit/{{ .Recipe.ID.Int64 }}"
-    ><input type="button" value="Edit"
-  /></a>
+   <a href="/edit/{{ .Recipe.ID.Int64 }}">
+    <input type="button" value="Edit"/>
+   </a>
 </div>
 
-<div id="ingredient-instruction-container">
-  <div id="ingredients">
-    <h2>Ingredients</h2>
-    {{ range (.Ingredients | formatIngredients) }} {{ . }} {{ end }}
-  </div>
+<div style="display:flex; flex-direction: column;">
+   <div id="ingredient-instruction-container">
+     <div id="ingredients">
+       <h2>Ingredients</h2>
+       {{ range (.Ingredients | formatIngredients) }} {{ . }} {{ end }}
+     </div>
 
-  <div id="instructions">
-    <h2>Instructions</h2>
-    {{ range (.Recipe.Instructions.String | splitLines) }}
-    <p>{{ . }}</p>
-    {{ end }}
-  </div>
+     <div id="instructions">
+       <h2>Instructions</h2>
+       {{ range (.Recipe.Instructions.String | splitLines) }}
+       <p>{{ . }}</p>
+       {{ end }}
+     </div>
+
+   </div>
+
+   <div id="comments">
+      <div>
+         <h3>Post a Comment</h3>
+         <form action="/comment" method="post" enctype="multipart/form-data">
+            <textarea name="comment"></textarea>
+            <input style="margin-top: 1em;" type="submit" value="Sumbit" />
+            <input name="recipe_id" value={{ .Recipe.ID.Int64 }} style="display: none" />
+            <input name="recipe_path" value={{ .Recipe.Path.String }} style="display: none" />
+         </form>
+      </div>
+
+      <div>
+         <h2>Comments</h2>
+
+         {{ $recipe := .Recipe }}
+         {{ if not .Comments }}<span style="font-size: 2em;"> 🦗 </span>{{end}}
+         {{ range .Comments }}
+         <section>
+         <h6><a href="mailto:{{ .Who.String }}?subject=RE: {{ $recipe.Title.String }}">{{ .Who.String }}</a> - <time datetime={{ .CreateTimestamp.String }}>{{ .CreateTimestamp.String | fdate }}</h6>
+         <p><pre>{{ .Comment.String }}</pre></p>
+         
+         <form action="/comment-delete" method="post" enctype="multipart/form-data">
+            <input style="font-size: 0.75em" type="submit" value="Delete" />
+            <input name="comment_id" value={{ .ID.Int64 }} style="display: none" />
+            <input name="recipe_path" value={{ $recipe.Path.String }} style="display: none" />
+         </form>
+         </section>
+         {{ end }}
+      </div>
+   </div>
 </div>
 
 <script type="text/javascript" src="/js/recipe_display.js"></script>

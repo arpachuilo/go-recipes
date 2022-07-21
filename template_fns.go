@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"regexp"
 	"strings"
+	"time"
 	"unicode"
 
 	"go-recipes/models"
@@ -29,6 +30,14 @@ var templateFns map[string]any = template.FuncMap{
 		}
 
 		return false
+	},
+	"fdate": func(date string) string {
+		parsed, err := time.Parse("2006-01-02T15:04:05Z07:00", date)
+		if err != nil {
+			return date
+		}
+
+		return parsed.Local().Format("2006/01/02 03:04:05PM")
 	},
 	// used for edit
 	"flattenTags": func(tags models.TagSlice) string {

@@ -12,9 +12,6 @@ from recipe_scrapers import scrape_me
 db = sys.argv[1]
 url = sys.argv[2]
 
-# scrape
-scraper = scrape_me(url, wild_mode=True)
-
 # open db
 con = sqlite3.connect(db)
 cur = con.cursor()
@@ -23,37 +20,65 @@ cur = con.cursor()
 cur.execute(
     """
     create table if not exists recipes
-    (id integer primary key autoincrement, url text unique, title text, instructions text, author text, total_time int, yields text, serving_size text, calories text, image blob, path text unique)"""
+    (id integer primary key autoincrement, url text unique, title text, instructions text, author text, total_time int, yields text, serving_size text, calories text, image blob, path text unique)
+    """
 )
 
 cur.execute(
     """
-create trigger if not exists idtopath
-after insert on recipes 
-begin
-  update recipes 
-  set path = (
-    case
-      when new.path is not null then new.path
-      else new.id
+    create trigger if not exists idtopath
+    after insert on recipes 
+    begin
+    update recipes 
+    set path = (
+        case
+        when new.path is not null then new.path
+        else new.id
+        end
+    )
+    where id = new.id;
     end
-  )
-  where id = new.id;
-end
-"""
+    """
 )
 
 cur.execute(
     """
     create table if not exists ingredients
-    (id integer primary key, recipeid int REFERENCES recipes(id), ingredient text)"""
+    (id integer primary key, recipeid int REFERENCES recipes(id), ingredient text)
+    """
 )
 
 cur.execute(
     """
     create table if not exists tags 
-    (id integer primary key, recipeid int REFERENCES recipes(id), tag text)"""
+    (id integer primary key, recipeid int REFERENCES recipes(id), tag text)
+    """
 )
+
+# check if already in table
+cur.execute(
+    """
+    select rowid
+    from recipes
+    where url = ?
+    """,
+    [url],
+)
+
+if cur.fetchone() is not None:
+    print("skipping ", url)
+    con.commit()
+    con.close()
+    exit()
+
+# scrape
+print("scraping ", url)
+scraper = None
+try:
+    scraper = scrape_me(url, wild_mode=True)
+except:
+    print("scraping failed ", url)
+    exit()
 
 # generate base64 thumbnail
 image = scraper.image()

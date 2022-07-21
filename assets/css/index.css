@@ -16,16 +16,6 @@
  * Copyright 2022 Andrew Pachuilo <andrew.pachuilo@gmail.com>
  */
 
-/* breakpoints */
-/* :root { */
-/*   --xs: 0px; */
-/*   --sm: 576px; */
-/*   --md: 768px; */
-/*   --lg: 992px; */
-/*   --xl: 1200px; */
-/*   --xxl: 1200px; */
-/* } */
-
 html {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
     Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
@@ -907,6 +897,14 @@ input.chip[type="checkbox"] {
   display: none;
 }
 
+input.chip[disabled] + label.chip {
+  opacity: 0.7;
+  cursor: default;
+  border: 1px solid var(--surface0) !important;
+  background: var(--surface0) !important;
+  color: var(--text) !important;
+}
+
 .blur {
   filter: blur(2px);
   z-index: -1;
@@ -968,4 +966,42 @@ input.chip[type="checkbox"] {
 
 li[onclick="strike(this)"] {
   cursor: pointer;
+}
+
+#comments {
+  display: flex;
+  flex-direction: column;
+}
+
+#comments time {
+  font-size: 0.8em;
+}
+
+#comments pre {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  background: none;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  max-width: 60ch;
+}
+
+#comments textarea {
+  width: 100%;
+  max-width: 60ch;
+}
+
+@media (min-width: 576px) {
+  #comments {
+    flex-direction: row;
+  }
+
+  #comments:first-child {
+    flex-grow: 1;
+  }
+
+  #comments > div:nth-child(1) {
+    min-width: 30ch;
+    margin-right: 0.5em;
+  }
 }

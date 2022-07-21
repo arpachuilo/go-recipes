@@ -21,24 +21,24 @@ var (
 	_ = queries.Equal
 )
 
-func testTags(t *testing.T) {
+func testComments(t *testing.T) {
 	t.Parallel()
 
-	query := Tags()
+	query := Comments()
 
 	if query.Query == nil {
 		t.Error("expected a query, got nothing")
 	}
 }
 
-func testTagsDelete(t *testing.T) {
+func testCommentsDelete(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Tag{}
-	if err = randomize.Struct(seed, o, tagDBTypes, true, tagColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Tag struct: %s", err)
+	o := &Comment{}
+	if err = randomize.Struct(seed, o, commentDBTypes, true, commentColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Comment struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -54,7 +54,7 @@ func testTagsDelete(t *testing.T) {
 		t.Error("should only have deleted one row, but affected:", rowsAff)
 	}
 
-	count, err := Tags().Count(ctx, tx)
+	count, err := Comments().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -64,14 +64,14 @@ func testTagsDelete(t *testing.T) {
 	}
 }
 
-func testTagsQueryDeleteAll(t *testing.T) {
+func testCommentsQueryDeleteAll(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Tag{}
-	if err = randomize.Struct(seed, o, tagDBTypes, true, tagColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Tag struct: %s", err)
+	o := &Comment{}
+	if err = randomize.Struct(seed, o, commentDBTypes, true, commentColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Comment struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -81,13 +81,13 @@ func testTagsQueryDeleteAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	if rowsAff, err := Tags().DeleteAll(ctx, tx); err != nil {
+	if rowsAff, err := Comments().DeleteAll(ctx, tx); err != nil {
 		t.Error(err)
 	} else if rowsAff != 1 {
 		t.Error("should only have deleted one row, but affected:", rowsAff)
 	}
 
-	count, err := Tags().Count(ctx, tx)
+	count, err := Comments().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -97,14 +97,14 @@ func testTagsQueryDeleteAll(t *testing.T) {
 	}
 }
 
-func testTagsSliceDeleteAll(t *testing.T) {
+func testCommentsSliceDeleteAll(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Tag{}
-	if err = randomize.Struct(seed, o, tagDBTypes, true, tagColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Tag struct: %s", err)
+	o := &Comment{}
+	if err = randomize.Struct(seed, o, commentDBTypes, true, commentColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Comment struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -114,7 +114,7 @@ func testTagsSliceDeleteAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	slice := TagSlice{o}
+	slice := CommentSlice{o}
 
 	if rowsAff, err := slice.DeleteAll(ctx, tx); err != nil {
 		t.Error(err)
@@ -122,7 +122,7 @@ func testTagsSliceDeleteAll(t *testing.T) {
 		t.Error("should only have deleted one row, but affected:", rowsAff)
 	}
 
-	count, err := Tags().Count(ctx, tx)
+	count, err := Comments().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -132,14 +132,14 @@ func testTagsSliceDeleteAll(t *testing.T) {
 	}
 }
 
-func testTagsExists(t *testing.T) {
+func testCommentsExists(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Tag{}
-	if err = randomize.Struct(seed, o, tagDBTypes, true, tagColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Tag struct: %s", err)
+	o := &Comment{}
+	if err = randomize.Struct(seed, o, commentDBTypes, true, commentColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Comment struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -149,23 +149,23 @@ func testTagsExists(t *testing.T) {
 		t.Error(err)
 	}
 
-	e, err := TagExists(ctx, tx, o.ID)
+	e, err := CommentExists(ctx, tx, o.ID)
 	if err != nil {
-		t.Errorf("Unable to check if Tag exists: %s", err)
+		t.Errorf("Unable to check if Comment exists: %s", err)
 	}
 	if !e {
-		t.Errorf("Expected TagExists to return true, but got false.")
+		t.Errorf("Expected CommentExists to return true, but got false.")
 	}
 }
 
-func testTagsFind(t *testing.T) {
+func testCommentsFind(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Tag{}
-	if err = randomize.Struct(seed, o, tagDBTypes, true, tagColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Tag struct: %s", err)
+	o := &Comment{}
+	if err = randomize.Struct(seed, o, commentDBTypes, true, commentColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Comment struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -175,24 +175,24 @@ func testTagsFind(t *testing.T) {
 		t.Error(err)
 	}
 
-	tagFound, err := FindTag(ctx, tx, o.ID)
+	commentFound, err := FindComment(ctx, tx, o.ID)
 	if err != nil {
 		t.Error(err)
 	}
 
-	if tagFound == nil {
+	if commentFound == nil {
 		t.Error("want a record, got nil")
 	}
 }
 
-func testTagsBind(t *testing.T) {
+func testCommentsBind(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Tag{}
-	if err = randomize.Struct(seed, o, tagDBTypes, true, tagColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Tag struct: %s", err)
+	o := &Comment{}
+	if err = randomize.Struct(seed, o, commentDBTypes, true, commentColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Comment struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -202,19 +202,19 @@ func testTagsBind(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err = Tags().Bind(ctx, tx, o); err != nil {
+	if err = Comments().Bind(ctx, tx, o); err != nil {
 		t.Error(err)
 	}
 }
 
-func testTagsOne(t *testing.T) {
+func testCommentsOne(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Tag{}
-	if err = randomize.Struct(seed, o, tagDBTypes, true, tagColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Tag struct: %s", err)
+	o := &Comment{}
+	if err = randomize.Struct(seed, o, commentDBTypes, true, commentColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Comment struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -224,38 +224,38 @@ func testTagsOne(t *testing.T) {
 		t.Error(err)
 	}
 
-	if x, err := Tags().One(ctx, tx); err != nil {
+	if x, err := Comments().One(ctx, tx); err != nil {
 		t.Error(err)
 	} else if x == nil {
 		t.Error("expected to get a non nil record")
 	}
 }
 
-func testTagsAll(t *testing.T) {
+func testCommentsAll(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	tagOne := &Tag{}
-	tagTwo := &Tag{}
-	if err = randomize.Struct(seed, tagOne, tagDBTypes, false, tagColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Tag struct: %s", err)
+	commentOne := &Comment{}
+	commentTwo := &Comment{}
+	if err = randomize.Struct(seed, commentOne, commentDBTypes, false, commentColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Comment struct: %s", err)
 	}
-	if err = randomize.Struct(seed, tagTwo, tagDBTypes, false, tagColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Tag struct: %s", err)
+	if err = randomize.Struct(seed, commentTwo, commentDBTypes, false, commentColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Comment struct: %s", err)
 	}
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
-	if err = tagOne.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err = commentOne.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Error(err)
 	}
-	if err = tagTwo.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err = commentTwo.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Error(err)
 	}
 
-	slice, err := Tags().All(ctx, tx)
+	slice, err := Comments().All(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -265,31 +265,31 @@ func testTagsAll(t *testing.T) {
 	}
 }
 
-func testTagsCount(t *testing.T) {
+func testCommentsCount(t *testing.T) {
 	t.Parallel()
 
 	var err error
 	seed := randomize.NewSeed()
-	tagOne := &Tag{}
-	tagTwo := &Tag{}
-	if err = randomize.Struct(seed, tagOne, tagDBTypes, false, tagColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Tag struct: %s", err)
+	commentOne := &Comment{}
+	commentTwo := &Comment{}
+	if err = randomize.Struct(seed, commentOne, commentDBTypes, false, commentColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Comment struct: %s", err)
 	}
-	if err = randomize.Struct(seed, tagTwo, tagDBTypes, false, tagColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Tag struct: %s", err)
+	if err = randomize.Struct(seed, commentTwo, commentDBTypes, false, commentColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Comment struct: %s", err)
 	}
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
-	if err = tagOne.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err = commentOne.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Error(err)
 	}
-	if err = tagTwo.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err = commentTwo.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Error(err)
 	}
 
-	count, err := Tags().Count(ctx, tx)
+	count, err := Comments().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -299,155 +299,155 @@ func testTagsCount(t *testing.T) {
 	}
 }
 
-func tagBeforeInsertHook(ctx context.Context, e boil.ContextExecutor, o *Tag) error {
-	*o = Tag{}
+func commentBeforeInsertHook(ctx context.Context, e boil.ContextExecutor, o *Comment) error {
+	*o = Comment{}
 	return nil
 }
 
-func tagAfterInsertHook(ctx context.Context, e boil.ContextExecutor, o *Tag) error {
-	*o = Tag{}
+func commentAfterInsertHook(ctx context.Context, e boil.ContextExecutor, o *Comment) error {
+	*o = Comment{}
 	return nil
 }
 
-func tagAfterSelectHook(ctx context.Context, e boil.ContextExecutor, o *Tag) error {
-	*o = Tag{}
+func commentAfterSelectHook(ctx context.Context, e boil.ContextExecutor, o *Comment) error {
+	*o = Comment{}
 	return nil
 }
 
-func tagBeforeUpdateHook(ctx context.Context, e boil.ContextExecutor, o *Tag) error {
-	*o = Tag{}
+func commentBeforeUpdateHook(ctx context.Context, e boil.ContextExecutor, o *Comment) error {
+	*o = Comment{}
 	return nil
 }
 
-func tagAfterUpdateHook(ctx context.Context, e boil.ContextExecutor, o *Tag) error {
-	*o = Tag{}
+func commentAfterUpdateHook(ctx context.Context, e boil.ContextExecutor, o *Comment) error {
+	*o = Comment{}
 	return nil
 }
 
-func tagBeforeDeleteHook(ctx context.Context, e boil.ContextExecutor, o *Tag) error {
-	*o = Tag{}
+func commentBeforeDeleteHook(ctx context.Context, e boil.ContextExecutor, o *Comment) error {
+	*o = Comment{}
 	return nil
 }
 
-func tagAfterDeleteHook(ctx context.Context, e boil.ContextExecutor, o *Tag) error {
-	*o = Tag{}
+func commentAfterDeleteHook(ctx context.Context, e boil.ContextExecutor, o *Comment) error {
+	*o = Comment{}
 	return nil
 }
 
-func tagBeforeUpsertHook(ctx context.Context, e boil.ContextExecutor, o *Tag) error {
-	*o = Tag{}
+func commentBeforeUpsertHook(ctx context.Context, e boil.ContextExecutor, o *Comment) error {
+	*o = Comment{}
 	return nil
 }
 
-func tagAfterUpsertHook(ctx context.Context, e boil.ContextExecutor, o *Tag) error {
-	*o = Tag{}
+func commentAfterUpsertHook(ctx context.Context, e boil.ContextExecutor, o *Comment) error {
+	*o = Comment{}
 	return nil
 }
 
-func testTagsHooks(t *testing.T) {
+func testCommentsHooks(t *testing.T) {
 	t.Parallel()
 
 	var err error
 
 	ctx := context.Background()
-	empty := &Tag{}
-	o := &Tag{}
+	empty := &Comment{}
+	o := &Comment{}
 
 	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, o, tagDBTypes, false); err != nil {
-		t.Errorf("Unable to randomize Tag object: %s", err)
+	if err = randomize.Struct(seed, o, commentDBTypes, false); err != nil {
+		t.Errorf("Unable to randomize Comment object: %s", err)
 	}
 
-	AddTagHook(boil.BeforeInsertHook, tagBeforeInsertHook)
+	AddCommentHook(boil.BeforeInsertHook, commentBeforeInsertHook)
 	if err = o.doBeforeInsertHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doBeforeInsertHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected BeforeInsertHook function to empty object, but got: %#v", o)
 	}
-	tagBeforeInsertHooks = []TagHook{}
+	commentBeforeInsertHooks = []CommentHook{}
 
-	AddTagHook(boil.AfterInsertHook, tagAfterInsertHook)
+	AddCommentHook(boil.AfterInsertHook, commentAfterInsertHook)
 	if err = o.doAfterInsertHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterInsertHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterInsertHook function to empty object, but got: %#v", o)
 	}
-	tagAfterInsertHooks = []TagHook{}
+	commentAfterInsertHooks = []CommentHook{}
 
-	AddTagHook(boil.AfterSelectHook, tagAfterSelectHook)
+	AddCommentHook(boil.AfterSelectHook, commentAfterSelectHook)
 	if err = o.doAfterSelectHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterSelectHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterSelectHook function to empty object, but got: %#v", o)
 	}
-	tagAfterSelectHooks = []TagHook{}
+	commentAfterSelectHooks = []CommentHook{}
 
-	AddTagHook(boil.BeforeUpdateHook, tagBeforeUpdateHook)
+	AddCommentHook(boil.BeforeUpdateHook, commentBeforeUpdateHook)
 	if err = o.doBeforeUpdateHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doBeforeUpdateHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected BeforeUpdateHook function to empty object, but got: %#v", o)
 	}
-	tagBeforeUpdateHooks = []TagHook{}
+	commentBeforeUpdateHooks = []CommentHook{}
 
-	AddTagHook(boil.AfterUpdateHook, tagAfterUpdateHook)
+	AddCommentHook(boil.AfterUpdateHook, commentAfterUpdateHook)
 	if err = o.doAfterUpdateHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterUpdateHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterUpdateHook function to empty object, but got: %#v", o)
 	}
-	tagAfterUpdateHooks = []TagHook{}
+	commentAfterUpdateHooks = []CommentHook{}
 
-	AddTagHook(boil.BeforeDeleteHook, tagBeforeDeleteHook)
+	AddCommentHook(boil.BeforeDeleteHook, commentBeforeDeleteHook)
 	if err = o.doBeforeDeleteHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doBeforeDeleteHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected BeforeDeleteHook function to empty object, but got: %#v", o)
 	}
-	tagBeforeDeleteHooks = []TagHook{}
+	commentBeforeDeleteHooks = []CommentHook{}
 
-	AddTagHook(boil.AfterDeleteHook, tagAfterDeleteHook)
+	AddCommentHook(boil.AfterDeleteHook, commentAfterDeleteHook)
 	if err = o.doAfterDeleteHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterDeleteHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterDeleteHook function to empty object, but got: %#v", o)
 	}
-	tagAfterDeleteHooks = []TagHook{}
+	commentAfterDeleteHooks = []CommentHook{}
 
-	AddTagHook(boil.BeforeUpsertHook, tagBeforeUpsertHook)
+	AddCommentHook(boil.BeforeUpsertHook, commentBeforeUpsertHook)
 	if err = o.doBeforeUpsertHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doBeforeUpsertHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected BeforeUpsertHook function to empty object, but got: %#v", o)
 	}
-	tagBeforeUpsertHooks = []TagHook{}
+	commentBeforeUpsertHooks = []CommentHook{}
 
-	AddTagHook(boil.AfterUpsertHook, tagAfterUpsertHook)
+	AddCommentHook(boil.AfterUpsertHook, commentAfterUpsertHook)
 	if err = o.doAfterUpsertHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterUpsertHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterUpsertHook function to empty object, but got: %#v", o)
 	}
-	tagAfterUpsertHooks = []TagHook{}
+	commentAfterUpsertHooks = []CommentHook{}
 }
 
-func testTagsInsert(t *testing.T) {
+func testCommentsInsert(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Tag{}
-	if err = randomize.Struct(seed, o, tagDBTypes, true, tagColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Tag struct: %s", err)
+	o := &Comment{}
+	if err = randomize.Struct(seed, o, commentDBTypes, true, commentColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Comment struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -457,7 +457,7 @@ func testTagsInsert(t *testing.T) {
 		t.Error(err)
 	}
 
-	count, err := Tags().Count(ctx, tx)
+	count, err := Comments().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -467,24 +467,24 @@ func testTagsInsert(t *testing.T) {
 	}
 }
 
-func testTagsInsertWhitelist(t *testing.T) {
+func testCommentsInsertWhitelist(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Tag{}
-	if err = randomize.Struct(seed, o, tagDBTypes, true); err != nil {
-		t.Errorf("Unable to randomize Tag struct: %s", err)
+	o := &Comment{}
+	if err = randomize.Struct(seed, o, commentDBTypes, true); err != nil {
+		t.Errorf("Unable to randomize Comment struct: %s", err)
 	}
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
-	if err = o.Insert(ctx, tx, boil.Whitelist(tagColumnsWithoutDefault...)); err != nil {
+	if err = o.Insert(ctx, tx, boil.Whitelist(commentColumnsWithoutDefault...)); err != nil {
 		t.Error(err)
 	}
 
-	count, err := Tags().Count(ctx, tx)
+	count, err := Comments().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -494,17 +494,17 @@ func testTagsInsertWhitelist(t *testing.T) {
 	}
 }
 
-func testTagToOneRecipeUsingRecipeidRecipe(t *testing.T) {
+func testCommentToOneRecipeUsingRecipeidRecipe(t *testing.T) {
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
-	var local Tag
+	var local Comment
 	var foreign Recipe
 
 	seed := randomize.NewSeed()
-	if err := randomize.Struct(seed, &local, tagDBTypes, true, tagColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Tag struct: %s", err)
+	if err := randomize.Struct(seed, &local, commentDBTypes, true, commentColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Comment struct: %s", err)
 	}
 	if err := randomize.Struct(seed, &foreign, recipeDBTypes, true, recipeColumnsWithDefault...); err != nil {
 		t.Errorf("Unable to randomize Recipe struct: %s", err)
@@ -528,8 +528,8 @@ func testTagToOneRecipeUsingRecipeidRecipe(t *testing.T) {
 		t.Errorf("want: %v, got %v", foreign.ID, check.ID)
 	}
 
-	slice := TagSlice{&local}
-	if err = local.L.LoadRecipeidRecipe(ctx, tx, false, (*[]*Tag)(&slice), nil); err != nil {
+	slice := CommentSlice{&local}
+	if err = local.L.LoadRecipeidRecipe(ctx, tx, false, (*[]*Comment)(&slice), nil); err != nil {
 		t.Fatal(err)
 	}
 	if local.R.RecipeidRecipe == nil {
@@ -545,18 +545,18 @@ func testTagToOneRecipeUsingRecipeidRecipe(t *testing.T) {
 	}
 }
 
-func testTagToOneSetOpRecipeUsingRecipeidRecipe(t *testing.T) {
+func testCommentToOneSetOpRecipeUsingRecipeidRecipe(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
-	var a Tag
+	var a Comment
 	var b, c Recipe
 
 	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, tagDBTypes, false, strmangle.SetComplement(tagPrimaryKeyColumns, tagColumnsWithoutDefault)...); err != nil {
+	if err = randomize.Struct(seed, &a, commentDBTypes, false, strmangle.SetComplement(commentPrimaryKeyColumns, commentColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
 	if err = randomize.Struct(seed, &b, recipeDBTypes, false, strmangle.SetComplement(recipePrimaryKeyColumns, recipeColumnsWithoutDefault)...); err != nil {
@@ -583,7 +583,7 @@ func testTagToOneSetOpRecipeUsingRecipeidRecipe(t *testing.T) {
 			t.Error("relationship struct not set to correct value")
 		}
 
-		if x.R.RecipeidTags[0] != &a {
+		if x.R.RecipeidComments[0] != &a {
 			t.Error("failed to append to foreign relationship struct")
 		}
 		if !queries.Equal(a.Recipeid, x.ID) {
@@ -603,18 +603,18 @@ func testTagToOneSetOpRecipeUsingRecipeidRecipe(t *testing.T) {
 	}
 }
 
-func testTagToOneRemoveOpRecipeUsingRecipeidRecipe(t *testing.T) {
+func testCommentToOneRemoveOpRecipeUsingRecipeidRecipe(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
-	var a Tag
+	var a Comment
 	var b Recipe
 
 	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, tagDBTypes, false, strmangle.SetComplement(tagPrimaryKeyColumns, tagColumnsWithoutDefault)...); err != nil {
+	if err = randomize.Struct(seed, &a, commentDBTypes, false, strmangle.SetComplement(commentPrimaryKeyColumns, commentColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
 	if err = randomize.Struct(seed, &b, recipeDBTypes, false, strmangle.SetComplement(recipePrimaryKeyColumns, recipeColumnsWithoutDefault)...); err != nil {
@@ -649,19 +649,19 @@ func testTagToOneRemoveOpRecipeUsingRecipeidRecipe(t *testing.T) {
 		t.Error("foreign key value should be nil")
 	}
 
-	if len(b.R.RecipeidTags) != 0 {
+	if len(b.R.RecipeidComments) != 0 {
 		t.Error("failed to remove a from b's relationships")
 	}
 }
 
-func testTagsReload(t *testing.T) {
+func testCommentsReload(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Tag{}
-	if err = randomize.Struct(seed, o, tagDBTypes, true, tagColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Tag struct: %s", err)
+	o := &Comment{}
+	if err = randomize.Struct(seed, o, commentDBTypes, true, commentColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Comment struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -676,14 +676,14 @@ func testTagsReload(t *testing.T) {
 	}
 }
 
-func testTagsReloadAll(t *testing.T) {
+func testCommentsReloadAll(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Tag{}
-	if err = randomize.Struct(seed, o, tagDBTypes, true, tagColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Tag struct: %s", err)
+	o := &Comment{}
+	if err = randomize.Struct(seed, o, commentDBTypes, true, commentColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Comment struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -693,21 +693,21 @@ func testTagsReloadAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	slice := TagSlice{o}
+	slice := CommentSlice{o}
 
 	if err = slice.ReloadAll(ctx, tx); err != nil {
 		t.Error(err)
 	}
 }
 
-func testTagsSelect(t *testing.T) {
+func testCommentsSelect(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Tag{}
-	if err = randomize.Struct(seed, o, tagDBTypes, true, tagColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Tag struct: %s", err)
+	o := &Comment{}
+	if err = randomize.Struct(seed, o, commentDBTypes, true, commentColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Comment struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -717,7 +717,7 @@ func testTagsSelect(t *testing.T) {
 		t.Error(err)
 	}
 
-	slice, err := Tags().All(ctx, tx)
+	slice, err := Comments().All(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -728,25 +728,25 @@ func testTagsSelect(t *testing.T) {
 }
 
 var (
-	tagDBTypes = map[string]string{`ID`: `INTEGER`, `Recipeid`: `INT`, `Tag`: `TEXT`}
-	_          = bytes.MinRead
+	commentDBTypes = map[string]string{`ID`: `INTEGER`, `Recipeid`: `INT`, `CreateTimestamp`: `TIMESTAMP`, `UpdateTimestamp`: `TIMESTAMP`, `Who`: `TEXT`, `Comment`: `TEXT`}
+	_              = bytes.MinRead
 )
 
-func testTagsUpdate(t *testing.T) {
+func testCommentsUpdate(t *testing.T) {
 	t.Parallel()
 
-	if 0 == len(tagPrimaryKeyColumns) {
+	if 0 == len(commentPrimaryKeyColumns) {
 		t.Skip("Skipping table with no primary key columns")
 	}
-	if len(tagAllColumns) == len(tagPrimaryKeyColumns) {
+	if len(commentAllColumns) == len(commentPrimaryKeyColumns) {
 		t.Skip("Skipping table with only primary key columns")
 	}
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Tag{}
-	if err = randomize.Struct(seed, o, tagDBTypes, true, tagColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Tag struct: %s", err)
+	o := &Comment{}
+	if err = randomize.Struct(seed, o, commentDBTypes, true, commentColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Comment struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -756,7 +756,7 @@ func testTagsUpdate(t *testing.T) {
 		t.Error(err)
 	}
 
-	count, err := Tags().Count(ctx, tx)
+	count, err := Comments().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -765,8 +765,8 @@ func testTagsUpdate(t *testing.T) {
 		t.Error("want one record, got:", count)
 	}
 
-	if err = randomize.Struct(seed, o, tagDBTypes, true, tagPrimaryKeyColumns...); err != nil {
-		t.Errorf("Unable to randomize Tag struct: %s", err)
+	if err = randomize.Struct(seed, o, commentDBTypes, true, commentPrimaryKeyColumns...); err != nil {
+		t.Errorf("Unable to randomize Comment struct: %s", err)
 	}
 
 	if rowsAff, err := o.Update(ctx, tx, boil.Infer()); err != nil {
@@ -776,18 +776,18 @@ func testTagsUpdate(t *testing.T) {
 	}
 }
 
-func testTagsSliceUpdateAll(t *testing.T) {
+func testCommentsSliceUpdateAll(t *testing.T) {
 	t.Parallel()
 
-	if len(tagAllColumns) == len(tagPrimaryKeyColumns) {
+	if len(commentAllColumns) == len(commentPrimaryKeyColumns) {
 		t.Skip("Skipping table with only primary key columns")
 	}
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Tag{}
-	if err = randomize.Struct(seed, o, tagDBTypes, true, tagColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Tag struct: %s", err)
+	o := &Comment{}
+	if err = randomize.Struct(seed, o, commentDBTypes, true, commentColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Comment struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -797,7 +797,7 @@ func testTagsSliceUpdateAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	count, err := Tags().Count(ctx, tx)
+	count, err := Comments().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -806,20 +806,20 @@ func testTagsSliceUpdateAll(t *testing.T) {
 		t.Error("want one record, got:", count)
 	}
 
-	if err = randomize.Struct(seed, o, tagDBTypes, true, tagPrimaryKeyColumns...); err != nil {
-		t.Errorf("Unable to randomize Tag struct: %s", err)
+	if err = randomize.Struct(seed, o, commentDBTypes, true, commentPrimaryKeyColumns...); err != nil {
+		t.Errorf("Unable to randomize Comment struct: %s", err)
 	}
 
 	// Remove Primary keys and unique columns from what we plan to update
 	var fields []string
-	if strmangle.StringSliceMatch(tagAllColumns, tagPrimaryKeyColumns) {
-		fields = tagAllColumns
+	if strmangle.StringSliceMatch(commentAllColumns, commentPrimaryKeyColumns) {
+		fields = commentAllColumns
 	} else {
 		fields = strmangle.SetComplement(
-			tagAllColumns,
-			tagPrimaryKeyColumns,
+			commentAllColumns,
+			commentPrimaryKeyColumns,
 		)
-		fields = strmangle.SetComplement(fields, tagGeneratedColumns)
+		fields = strmangle.SetComplement(fields, commentGeneratedColumns)
 	}
 
 	value := reflect.Indirect(reflect.ValueOf(o))
@@ -836,7 +836,7 @@ func testTagsSliceUpdateAll(t *testing.T) {
 		}
 	}
 
-	slice := TagSlice{o}
+	slice := CommentSlice{o}
 	if rowsAff, err := slice.UpdateAll(ctx, tx, updateMap); err != nil {
 		t.Error(err)
 	} else if rowsAff != 1 {
@@ -844,28 +844,28 @@ func testTagsSliceUpdateAll(t *testing.T) {
 	}
 }
 
-func testTagsUpsert(t *testing.T) {
+func testCommentsUpsert(t *testing.T) {
 	t.Parallel()
-	if len(tagAllColumns) == len(tagPrimaryKeyColumns) {
+	if len(commentAllColumns) == len(commentPrimaryKeyColumns) {
 		t.Skip("Skipping table with only primary key columns")
 	}
 
 	seed := randomize.NewSeed()
 	var err error
 	// Attempt the INSERT side of an UPSERT
-	o := Tag{}
-	if err = randomize.Struct(seed, &o, tagDBTypes, true); err != nil {
-		t.Errorf("Unable to randomize Tag struct: %s", err)
+	o := Comment{}
+	if err = randomize.Struct(seed, &o, commentDBTypes, true); err != nil {
+		t.Errorf("Unable to randomize Comment struct: %s", err)
 	}
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 	if err = o.Upsert(ctx, tx, false, nil, boil.Infer(), boil.Infer()); err != nil {
-		t.Errorf("Unable to upsert Tag: %s", err)
+		t.Errorf("Unable to upsert Comment: %s", err)
 	}
 
-	count, err := Tags().Count(ctx, tx)
+	count, err := Comments().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -874,15 +874,15 @@ func testTagsUpsert(t *testing.T) {
 	}
 
 	// Attempt the UPDATE side of an UPSERT
-	if err = randomize.Struct(seed, &o, tagDBTypes, false, tagPrimaryKeyColumns...); err != nil {
-		t.Errorf("Unable to randomize Tag struct: %s", err)
+	if err = randomize.Struct(seed, &o, commentDBTypes, false, commentPrimaryKeyColumns...); err != nil {
+		t.Errorf("Unable to randomize Comment struct: %s", err)
 	}
 
 	if err = o.Upsert(ctx, tx, true, nil, boil.Infer(), boil.Infer()); err != nil {
-		t.Errorf("Unable to upsert Tag: %s", err)
+		t.Errorf("Unable to upsert Comment: %s", err)
 	}
 
-	count, err = Tags().Count(ctx, tx)
+	count, err = Comments().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}

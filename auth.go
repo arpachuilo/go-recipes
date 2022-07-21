@@ -37,14 +37,19 @@ type Auth struct {
 	tokenExpiresAfter        time.Duration
 }
 
+type AuthContext struct {
+	echo.Context
+	username string
+}
+
 func NewAuth(conf AuthConfig) *Auth {
 	return &Auth{conf.MagicLinkHost, conf.Enabled, []byte(conf.Secret), conf.VerificationExpiresAfter, conf.TokenName, conf.TokenExpiresAfter}
 }
 
-func (self *Auth) VerifyToken(c echo.Context) bool {
+func (self *Auth) ReadToken(c echo.Context) *jwt.Token {
 	cookie, err := c.Cookie(self.tokenName)
 	if err != nil {
-		return false
+		return nil
 	}
 
 	token, err := jwt.Parse(cookie.Value, func(t *jwt.Token) (interface{}, error) {
@@ -55,20 +60,30 @@ func (self *Auth) VerifyToken(c echo.Context) bool {
 		return self.secret, nil
 	})
 	if err != nil {
-		return false
+		return nil
 	}
 
-	return token.Valid
+	return token
 }
 
 func (self *Auth) Use(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		if self.enabled && !self.VerifyToken(c) {
-			c.Response().Header().Add("Content-Type", "text/html; charset=UTF-8")
-			return c.Redirect(http.StatusTemporaryRedirect, "/login")
+		ca := &AuthContext{Context: c}
+		if self.enabled {
+			token := self.ReadToken(c)
+			if token == nil || !token.Valid {
+				c.Response().Header().Add("Content-Type", "text/html; charset=UTF-8")
+				return c.Redirect(http.StatusTemporaryRedirect, "/login")
+			}
+
+			if claims, ok := token.Claims.(jwt.MapClaims); ok {
+				if subject, ok := claims["sub"].(string); ok {
+					ca.username = subject
+				}
+			}
 		}
 
-		return next(c)
+		return next(ca)
 	}
 }
 
@@ -175,8 +190,8 @@ func (self App) SendLink() registerable.Registration {
 					return err
 				}
 
-				// return fmt.Errorf("%v/verify-link?verification_code=%v", self.magicLinkHost, verificationCode)
-				return self.Mailer.Send("Magic Link for Recipes DB", body.String(), email)
+				return fmt.Errorf("%v/verify-link?verification_code=%v", self.magicLinkHost, verificationCode)
+				// return self.Mailer.Send("Magic Link for Recipes DB", body.String(), email)
 			}()
 			if err != nil {
 				redirectURL := fmt.Sprintf("%v?error=%v", c.Request().Referer(), err)

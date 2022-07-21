@@ -37,8 +37,8 @@ type Config struct {
 	Mailer   MailerConfig   `mapstructure:"mailer"`
 }
 
-// TODO: Look into impromvements to prevent multiple db reads on image serving
-// TODO: Look into template context to set/unset nav
+// TODO: Look into improvements to prevent multiple db reads on image serving
+// TODO: Look into template context to set/unset navigation
 // TODO: Look into clustering recipe data (assign most relevant emoji maybe even?)
 func main() {
 	// load config
