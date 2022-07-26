@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/arpachuilo/go-registerable"
+	"github.com/arpachuilo/go-registrable"
 	"github.com/labstack/echo/v4"
 )
 
@@ -56,7 +56,7 @@ func (self *RecipeCluster) cluster() error {
 	return nil
 }
 
-func (self App) ServeCluster() registerable.Registration {
+func (self App) ServeCluster() registrable.Registration {
 	// read templates dynamically for debug
 	tmplFullName := "recipe_clustering"
 	fullTemplate := template.Must(template.New("base").Funcs(templateFns).ParseFiles(

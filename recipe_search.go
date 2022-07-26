@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/arpachuilo/go-registerable"
+	"github.com/arpachuilo/go-registrable"
 	"github.com/labstack/echo/v4"
 	. "github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
@@ -25,7 +25,7 @@ type SearchTemplate struct {
 	Limit        string
 }
 
-func (self App) ServeSearch() registerable.Registration {
+func (self App) ServeSearch() registrable.Registration {
 	// read templates dynamically for debug
 	tmplFullName := "recipe_search_results"
 	fullTemplate := template.Must(template.New("base").Funcs(templateFns).ParseFiles(

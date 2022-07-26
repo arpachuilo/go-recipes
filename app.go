@@ -8,7 +8,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/arpachuilo/go-registerable"
+	"github.com/arpachuilo/go-registrable"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/volatiletech/sqlboiler/v4/boil"
@@ -150,7 +150,7 @@ func NewApp(conf *Config) *App {
 		ImageETags: imageEtags,
 	}
 
-	registerable.RegisterMethods[EchoHandlerRegistration](h)
+	registrable.RegisterMethods[EchoHandlerRegistration](h)
 
 	return h
 }

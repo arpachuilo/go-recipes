@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/arpachuilo/go-registerable"
+	"github.com/arpachuilo/go-registrable"
 	"github.com/chai2010/webp"
 	"github.com/labstack/echo/v4"
 	"github.com/nfnt/resize"
@@ -24,7 +24,7 @@ type CreateTemplate struct {
 	Error string
 }
 
-func (self App) ServeCreateRecipe() registerable.Registration {
+func (self App) ServeCreateRecipe() registrable.Registration {
 	tmplName := "recipe_create"
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
 		"templates/base.gohtml",
@@ -167,7 +167,7 @@ func createRecipe(db *sql.DB, c echo.Context) (id int64, err error) {
 	return
 }
 
-func (self App) CreateRecipe() registerable.Registration {
+func (self App) CreateRecipe() registrable.Registration {
 	return EchoHandlerRegistration{
 		Path:        "/create",
 		Methods:     []Method{POST},

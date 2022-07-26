@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"os/exec"
 
-	"github.com/arpachuilo/go-registerable"
+	"github.com/arpachuilo/go-registrable"
 	"github.com/labstack/echo/v4"
 	"github.com/volatiletech/null/v8"
 )
@@ -18,7 +18,7 @@ type ImportTemplate struct {
 	Error string
 }
 
-func (self App) ServeRecipeImport() registerable.Registration {
+func (self App) ServeRecipeImport() registrable.Registration {
 	// read templates dynamically for debug
 	tmplName := "recipe_import"
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
@@ -57,7 +57,7 @@ func scrapeRecipe(db, url string) error {
 	return nil
 }
 
-func (self App) ImportRecipe() registerable.Registration {
+func (self App) ImportRecipe() registrable.Registration {
 	return EchoHandlerRegistration{
 		Path:        "/import",
 		Methods:     []Method{POST},

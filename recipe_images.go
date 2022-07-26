@@ -4,13 +4,13 @@ import (
 	"go-recipes/models"
 	"net/http"
 
-	"github.com/arpachuilo/go-registerable"
+	"github.com/arpachuilo/go-registrable"
 	"github.com/labstack/echo/v4"
 	"github.com/volatiletech/null/v8"
 	. "github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
-func (self App) ServeRecipeImages() registerable.Registration {
+func (self App) ServeRecipeImages() registrable.Registration {
 	return EchoHandlerRegistration{
 		Path:    "/images/recipe/:path",
 		Methods: []Method{GET},

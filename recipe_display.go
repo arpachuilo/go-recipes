@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/arpachuilo/go-registerable"
+	"github.com/arpachuilo/go-registrable"
 	"github.com/labstack/echo/v4"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
@@ -24,7 +24,7 @@ type RecipeTemplate struct {
 	Comments    models.CommentSlice
 }
 
-func (self App) ServeRecipeDisplay() registerable.Registration {
+func (self App) ServeRecipeDisplay() registrable.Registration {
 	// read templates dynamically for debug
 	tmplName := "recipe_display"
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
@@ -140,7 +140,7 @@ func createComment(db *sql.DB, c echo.Context) (string, error) {
 	return recipe_path, nil
 }
 
-func (self App) AddCommentRecipe() registerable.Registration {
+func (self App) AddCommentRecipe() registrable.Registration {
 	return EchoHandlerRegistration{
 		Path:        "/comment",
 		Methods:     []Method{POST},
@@ -196,7 +196,7 @@ func deleteComment(db *sql.DB, c echo.Context) (string, error) {
 	return recipe_path, nil
 }
 
-func (self App) RemoveCommentRecipe() registerable.Registration {
+func (self App) RemoveCommentRecipe() registrable.Registration {
 	return EchoHandlerRegistration{
 		Path:        "/comment-delete",
 		Methods:     []Method{POST},

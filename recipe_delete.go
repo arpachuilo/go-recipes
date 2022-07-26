@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/arpachuilo/go-registerable"
+	"github.com/arpachuilo/go-registrable"
 	"github.com/labstack/echo/v4"
 	"github.com/volatiletech/null/v8"
 	. "github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -68,7 +68,7 @@ func deleteRecipe(db *sql.DB, id int64) (err error) {
 	return nil
 }
 
-func (self App) DeleteRecipe() registerable.Registration {
+func (self App) DeleteRecipe() registrable.Registration {
 	return EchoHandlerRegistration{
 		Path:        "/delete/:id",
 		Methods:     []Method{POST}, // work with HTML form standards

@@ -14,7 +14,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/arpachuilo/go-registerable"
+	"github.com/arpachuilo/go-registrable"
 	"github.com/chai2010/webp"
 	"github.com/labstack/echo/v4"
 	"github.com/nfnt/resize"
@@ -30,7 +30,7 @@ type EditTemplate struct {
 	Tags        models.TagSlice
 }
 
-func (self App) ServeEditRecipe() registerable.Registration {
+func (self App) ServeEditRecipe() registrable.Registration {
 	// read templates dynamically for debug
 	tmplName := "recipe_edit"
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
@@ -240,7 +240,7 @@ func editRecipe(db *sql.DB, id int64, c echo.Context) (path string, err error) {
 	return
 }
 
-func (self App) EditRecipe() registerable.Registration {
+func (self App) EditRecipe() registrable.Registration {
 	return EchoHandlerRegistration{
 		Path:        "/edit/:id",
 		Methods:     []Method{POST},

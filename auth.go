@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/arpachuilo/go-registerable"
+	"github.com/arpachuilo/go-registrable"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -92,7 +92,7 @@ type LoginTemplate struct {
 	Error string
 }
 
-func (self App) ServeLogin() registerable.Registration {
+func (self App) ServeLogin() registrable.Registration {
 	// read templates dynamically for debug
 	tmplName := "login"
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
@@ -124,7 +124,7 @@ type MagicLinkTemplate struct {
 	Expiry string
 }
 
-func (self App) SendLink() registerable.Registration {
+func (self App) SendLink() registrable.Registration {
 	tmplName := "magic_link"
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
 		"templates/magic_link.gohtml",
@@ -204,7 +204,7 @@ func (self App) SendLink() registerable.Registration {
 	}
 }
 
-func (self App) ServeLinkSent() registerable.Registration {
+func (self App) ServeLinkSent() registrable.Registration {
 	tmplName := "link_sent"
 	tmpl := template.Must(template.New("base").Funcs(templateFns).ParseFiles(
 		"templates/base.gohtml",
@@ -227,7 +227,7 @@ func (self App) ServeLinkSent() registerable.Registration {
 	}
 }
 
-func (self App) VerifyLink() registerable.Registration {
+func (self App) VerifyLink() registrable.Registration {
 	return EchoHandlerRegistration{
 		Path:    "/verify-link",
 		Methods: []Method{GET},
