@@ -99,7 +99,7 @@
          <h3>Post a Comment</h3>
          <form action="/comment" method="post" enctype="multipart/form-data">
             <textarea name="comment"></textarea>
-            <input style="margin-top: 1em;" type="submit" value="Sumbit" />
+            <input style="margin-top: 1em;" type="submit" value="Submit" />
             <input name="recipe_id" value={{ .Recipe.ID.Int64 }} style="display: none" />
             <input name="recipe_path" value={{ .Recipe.Path.String }} style="display: none" />
          </form>
