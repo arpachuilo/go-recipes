@@ -22,6 +22,7 @@ type RecipeTemplate struct {
 	Ingredients models.IngredientSlice
 	Tags        models.TagSlice
 	Comments    models.CommentSlice
+	User        string
 }
 
 func (self App) ServeRecipeDisplay() registrable.Registration {
@@ -95,6 +96,9 @@ func (self App) ServeRecipeDisplay() registrable.Registration {
 				return err
 			}
 
+			// get current user
+			cc := c.(*AuthContext)
+
 			// run template
 			data := &RecipeTemplate{
 				Title:       fmt.Sprintf("%v", recipe.Title.String),
@@ -102,6 +106,7 @@ func (self App) ServeRecipeDisplay() registrable.Registration {
 				Ingredients: ingredients,
 				Tags:        tags,
 				Comments:    comments,
+				User:        cc.username,
 			}
 
 			return c.Render(http.StatusOK, tmplName, data)

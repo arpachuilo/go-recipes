@@ -109,17 +109,20 @@
          <h2>Comments</h2>
 
          {{ $recipe := .Recipe }}
+         {{ $user := .User }}
          {{ if not .Comments }}<span style="font-size: 2em;"> 🦗 </span>{{end}}
          {{ range .Comments }}
          <section>
          <h6><a href="mailto:{{ .Who.String }}?subject=RE: {{ $recipe.Title.String }}">{{ .Who.String }}</a> - <time datetime={{ .CreateTimestamp.String }}>{{ .CreateTimestamp.String | fdate }}</h6>
          <p><pre>{{ .Comment.String }}</pre></p>
          
+         {{ if eq .Who.String $user  }}
          <form action="/comment-delete" method="post" enctype="multipart/form-data">
             <input style="font-size: 0.75em" type="submit" value="Delete" />
             <input name="comment_id" value={{ .ID.Int64 }} style="display: none" />
             <input name="recipe_path" value={{ $recipe.Path.String }} style="display: none" />
          </form>
+         {{end}}
          </section>
          {{ end }}
       </div>
