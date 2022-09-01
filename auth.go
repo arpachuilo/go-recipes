@@ -190,9 +190,9 @@ func (self App) SendLink() registrable.Registration {
 					return err
 				}
 
-				return fmt.Errorf("%v/verify-link?verification_code=%v", self.magicLinkHost, verificationCode)
-				// return self.Mailer.Send("Magic Link for Recipes DB", body.String(), email)
+				return self.Mailer.Send("Magic Link for Recipes DB", body.String(), email)
 			}()
+
 			if err != nil {
 				redirectURL := fmt.Sprintf("%v?error=%v", c.Request().Referer(), err)
 				return c.Redirect(http.StatusFound, redirectURL)
