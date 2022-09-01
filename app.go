@@ -123,7 +123,7 @@ func NewApp(conf *Config) *App {
 	imageEtags := NewETags[int64]()
 
 	// new clustering
-	rc := NewRecipeCluster(conf.Database.Path, conf.Server.AssetsDir+"/cluster.html", 5)
+	// rc := NewRecipeCluster(conf.Database.Path, conf.Server.AssetsDir+"/cluster.html", 5)
 
 	// hook into etags invalidation
 	hook := func(ctx context.Context, exec boil.ContextExecutor, r *models.Recipe) error {
@@ -131,7 +131,7 @@ func NewApp(conf *Config) *App {
 		imageEtags.InvalidateByID(r.ID.Int64)
 
 		// cluster
-		rc.Run()
+		// rc.Run()
 		return nil
 	}
 
