@@ -58,3 +58,7 @@ path = "./recipes.db"
 Currently only supports sqlite3. Does make use of [sqlboiler](https://github.com/volatiletech/sqlboiler#sqlboiler) so could be possible enough to easily extend to supporting other databases. But why bother for a personal project.
 
 The quickest way to setup the database would be to checkout the scraping program in `cmds/scrape`. If you would rather not, just create your own using the same commands used in `scrape.py`.
+
+Image of website
+<img width="1058" alt="Screen Shot 2022-09-06 at 20 20 32" src="https://user-images.githubusercontent.com/8808952/188762195-2b224491-256f-4854-9d1d-4adbb595e37b.png">
+
