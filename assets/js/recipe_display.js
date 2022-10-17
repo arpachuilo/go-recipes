@@ -74,3 +74,8 @@ function syncSrolls(_tx, _rx) {
 }
 
 window.syncSrolls = syncSrolls;
+
+// wake-lock for chrome
+if ("wakeLock" in navigator) {
+  navigator.wakeLock.request('screen');
+}
