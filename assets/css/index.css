@@ -30,6 +30,29 @@ html {
   background: var(--link-hover);
 }
 
+/* theme toggle */
+#theme-selector fieldset {
+  border: none;
+}
+
+#light+label, #dark+label {
+  cursor: pointer;
+  font-size: 2em;
+  transition: text-shadow ease 0.33s;
+}
+
+#light+label:hover, #dark+label:hover {
+  text-shadow: 0.1em 0.1em var(--text);
+}
+
+#light:checked+label {
+  display: none;
+}
+
+#dark:checked+label {
+  display: none;
+}
+
 /* logo */
 .nav-logo {
   flex-grow: 1;
@@ -39,7 +62,6 @@ html {
   display: flex;
   align-items: center;
   text-decoration: none;
-  font-family: monospace;
 }
 
 .logo {
@@ -359,9 +381,12 @@ nav li {
 
 figure img {
   max-height: 8rem;
+  min-height: 8rem;
   max-width: 100%;
   width: auto;
   object-fit: contain;
+  border-top-right-radius: var(--border-radius);
+  border-top-left-radius: var(--border-radius);
 }
 
 figure {
@@ -382,6 +407,9 @@ figure {
 
 figure.figure-full img {
   max-height: 10rem;
+  border-top-right-radius: 0px;
+  border-top-left-radius: var(--border-radius);
+  border-bottom-left-radius: var(--border-radius);
 }
 
 @media (min-width: 768px) {
@@ -413,6 +441,10 @@ figcaption {
   margin-left: 0.5em;
   margin-right: 0.5em;
   text-align: center;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;  
+  overflow: hidden;
 }
 
 figure.figure-full figcaption {
@@ -432,46 +464,47 @@ figure > a:hover {
   color: var(--text) !important;
 }
 
-/* figure:has(a):hover { */
 figure:hover {
   display: flex;
   flex-direction: column;
-  transform: translate(-0.15em, -0.15em);
+  transform: translate(-0.5em, -0.0em);
   border: 1px solid var(--link-same-domain);
-  box-shadow: 0px 5px 0px 5px var(--link-same-domain);
+  box-shadow: 5px 0px 0px 0px var(--link-same-domain);
 }
 
-/* safar + experimental */
+/* safari + experimental */
 figure:has(a:visited):hover {
   border: 1px solid var(--link-same-domain-visited);
-  box-shadow: 0px 5px 0px 5px var(link-same-domain-visited);
+  box-shadow: 5px 0px 0px 0px var(link-same-domain-visited);
 }
 
-/* safar + experimental */
+/* safari + experimental */
 /* same page links  */
 figure:has(a[href^="#"]:not([id])):hover {
   border: 1px solid var(--link-same-page);
-  box-shadow: 0px 5px 0px 5px var(--link-same-page);
+  box-shadow: 5px 0px 0px 0px var(--link-same-page);
 }
 
 figure:has(a[href^="#"]:not([id]):visited):hover {
   border: 1px solid var(--link-same-page-visited);
-  box-shadow: 0px 5px 0px 5px var(--link-same-page-visited);
+  box-shadow: 5px 0px 0px 0px var(--link-same-page-visited);
 }
 
 /* external links + opens in new page/tab */
 figure:has(a[href^="http:"]):hover,
 figure:has(a[href^="https:"]):hover,
 figure:has(a[target="_blank"]):hover {
+  transform: translate(0.5em, -0.0em);
   border: 1px solid var(--link-external);
-  box-shadow: 0px 5px 0px 5px var(--link-external);
+  box-shadow: -5px 0px 0px 0px var(--link-external);
 }
 
 figure:has(a[href^="http:"]:visited):hover,
 figure:has(a[href^="https:"]:visited):hover,
 figure:has(a[target="_blank"]:visited):hover {
+  transform: translate(0.5em, -0.0em);
   border: 1px solid var(--link-external-visited);
-  box-shadow: 0px 5px 0px 5px var(--link-external-visited);
+  box-shadow: -5px 0px 0px 0px var(--link-external-visited);
 }
 
 /* LIST */
@@ -914,6 +947,7 @@ input.chip[disabled] + label.chip {
   background-size: 200%;
   background-position: center;
 }
+
 
 #ingredient-instruction-container {
   /* display: flex; */

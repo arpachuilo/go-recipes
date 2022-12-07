@@ -25,16 +25,19 @@ function setTheme(theme) {
     );
     localStorage.setItem("theme-base", color);
     setThemeMeta(color);
-    let el = document.getElementById("theme-select");
-    el.value = theme;
+
+    let isLightMode = theme === "/css/themes/light.css";
+    console.log(isLightMode, document.getElementById("light"))
+    document.getElementById("light").checked = isLightMode;
+    document.getElementById("dark").checked = !isLightMode;
   }, 33);
 }
 
 window.setTheme = setTheme;
 window.setThemeMeta = setTheme;
 
-let theme = localStorage.getItem("theme") || "/static/css/themes/macchiato.css";
-let color = localStorage.getItem("theme-base") || "#1e2030;";
+let theme = localStorage.getItem("theme") || "/static/css/themes/dark.css";
+let color = localStorage.getItem("theme-base") || "##141414";
 
 setTheme(theme);
 setThemeMeta(color);

@@ -174,6 +174,8 @@ func (self App) Register(r EchoHandlerRegistration) {
 		// wrap auth if needed
 		if r.RequireAuth {
 			h = self.Auth.Use(h)
+		} else {
+			h = self.Auth.Skip(h)
 		}
 
 		switch method {

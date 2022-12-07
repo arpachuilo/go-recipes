@@ -19,6 +19,9 @@ var templateFns map[string]any = template.FuncMap{
 	"removeAlpha": func(u string) string {
 		return noAlpha.ReplaceAllString(u, "")
 	},
+	"dec": func(i int) int {
+		return i - 1
+	},
 	"inc": func(i int) int {
 		return i + 1
 	},

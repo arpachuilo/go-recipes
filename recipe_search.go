@@ -22,6 +22,7 @@ type SearchTemplate struct {
 	Search       string
 	Page         int
 	Pages        []int
+	LastPage     int
 	Limit        string
 }
 
@@ -147,8 +148,21 @@ func (self App) ServeSearch() registrable.Registration {
 			// generate pages
 			pages := make([]int, 0)
 			numPages := (int(count) + limit - 1) / limit
+			lastPage := 0
 			if numPages > 1 {
 				for i := 0; i < numPages; i++ {
+					// limit pages
+					// keep first and last
+					// center around current
+					if numPages > 15 &&
+						i != page &&
+						i != 0 &&
+						i != numPages-1 &&
+						(i < page-5 || i > page+5) {
+						continue
+					}
+
+					lastPage = i
 					pages = append(pages, i)
 				}
 			}
@@ -174,6 +188,7 @@ func (self App) ServeSearch() registrable.Registration {
 				SelectedTags: tags,
 				Page:         page,
 				Pages:        pages,
+				LastPage:     lastPage,
 				Limit:        c.QueryParam("limit"),
 			}
 

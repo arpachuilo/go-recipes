@@ -31,13 +31,21 @@
 <div id="pagination" style="grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center;">
   <nav>
     <ul>
-      {{ $search := .Search }}{{ $page := .Page }}{{ $limit := .Limit }}
-      {{ range $i, $o := .Pages }}
+      {{ $search := .Search }}{{ $pages := .Pages }}{{ $page := .Page }}{{ $lastPage := .LastPage }}{{ $limit := .Limit }}
+      {{ if ne 0 $page }}
+        <li><a href="/?search={{ $search }}&page={{ dec $page }}{{ if ne $limit "" }}&limit={{ $limit }}{{ end }}">«</a></li>
+      {{ end }}
+      {{ range $i, $o := $pages }}
+        {{ if and (eq $i 1) (ne 1 $o) }}<li>. . .</li>{{ end }}
       <li>
         {{ if ne $o $page }}
-        <a href="/?search={{ $search }}&page={{ $o }}{{ if ne $limit "" }}&limit={{ $limit }}{{ end }}">{{ inc $i }}</a>
-        {{ else }} {{ inc $i }} {{ end }}
+        <a href="/?search={{ $search }}&page={{ $o }}{{ if ne $limit "" }}&limit={{ $limit }}{{ end }}">{{ inc $o }}</a>
+        {{ else }} {{ inc $o }} {{ end }}
       </li>
+        {{ if and (eq $i (dec (dec (len $pages)))) (ne $o (dec $lastPage)) }}<li>. . .</li>{{ end }}
+      {{ end }}
+      {{ if ne $lastPage $page }}
+        <li><a href="/?search={{ $search }}&page={{ inc $page }}{{ if ne $limit "" }}&limit={{ $limit }}{{ end }}">»</a></li>
       {{ end }}
     </ul>
   </nav>

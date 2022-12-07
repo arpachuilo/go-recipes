@@ -87,6 +87,13 @@ func (self *Auth) Use(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
+func (self *Auth) Skip(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ca := &AuthContext{Context: c}
+		return next(ca)
+	}
+}
+
 type LoginTemplate struct {
 	Title string
 	Error string

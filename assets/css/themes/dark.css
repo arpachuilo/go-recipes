@@ -1,0 +1,88 @@
+:root {
+  /* bg color */
+  --base: #2B2B2B;
+  --crust: #000;
+  --mantle: #141414;
+
+  --surface0: #141414;
+  --surface1: #332C2F;
+  --surface2: #3F3A3C;
+
+  --overlay0: #6c7086;
+  --overlay1: #7f849c;
+  --overlay2: #9399b2;
+
+  /* typography */
+  --text: #fff;
+  --subtext0: #fff;
+  --subtext1: #fff;
+  --textoverlay1: #fff;
+
+  /* colors */
+  --rosewater: #FF777A;
+  --flamingo: #FF5157;
+  --pink: #F64F9F;
+  --mauve: #A650A7;
+  --red: #FE5258;
+  --maroon: #FF777A;
+  --peach: #F7811C;
+  --yellow: #FFC700;
+  --green: #63B947;
+  --teal: #179299;
+  --sky: #04a5e5;
+  --sapphire: #209fb5;
+  --blue: #0679FF;
+  --lavender: #B874BA;
+
+  /* links */
+  --link-same-page: var(--pink);
+  --link-same-page-visited: var(--text);
+
+  --link-same-domain: var(--pink);
+  --link-same-domain-visited: var(--text);
+
+  --link-external: var(--green);
+  --link-external-visited: var(--teal);
+
+  --link-hover: var(--blue);
+
+  /* shapes */
+  --border-radius: 5px;
+  --arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 2'%3E%3Cpath fill='rgba(255,255,255,0.7)' fill-rule='nonzero' d='M1.5 2L3 0H0z'/%3E%3C/svg%3E");
+}
+
+.nib{
+    fill:#F2D8B8;
+}
+.blade{
+    fill:#e6e9ef;
+}
+.pen{
+    fill:#726061;
+}
+.j{
+    stroke-width:.5px;
+}
+.j,.k{
+    stroke:#000;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+}
+.j,.k,.l{
+    fill:none;
+}
+.handle{
+    fill:#3E7249;
+}
+.n{
+    clip-path:url(#e);
+}
+.o{
+    clip-path:url(#f);
+}
+.p{
+    fill:#000102;
+}
+.ring{
+    fill:#FFF;
+}

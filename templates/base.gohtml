@@ -26,20 +26,20 @@
 
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#e6e9ef">
-    <meta name="theme-color" media="(prefers-color-scheme: dark)"  content="#1e2030">
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#E7E9EF">
+    <meta name="theme-color" media="(prefers-color-scheme: dark)"  content="#141414">
 
     <!-- CSS for users with dark mode -->
     <link
       rel="stylesheet"
-      href="/css/themes/macchiato.css"
+      href="/css/themes/dark.css"
       media="(prefers-color-scheme: no-preference), (prefers-color-scheme: dark)"
     />
 
     <!-- CSS for users without dark mode -->
     <link
       rel="stylesheet"
-      href="/css/themes/latte.css"
+      href="/css/themes/light.css"
       media="(prefers-color-scheme: light)"
     />
 
@@ -191,16 +191,13 @@
         {{ template "nav" . }}
       </div>
 
-      <div style="display: flex; flex-direction: column">
-        <label style="margin-left: 0.2em; font-size: 0.8rem" for="theme-select"
-          >Theme</label
-        >
-        <select id="theme-select" onchange="setTheme(this.value)">
-          <option value="/css/themes/latte.css">latte</option>
-          <option value="/css/themes/frappe.css">frappe</option>
-          <option value="/css/themes/macchiato.css">macchiato</option>
-          <option value="/css/themes/mocha.css">mocha</option>
-        </select>
+      <div id="theme-selector" style="display: flex; flex-direction: column">
+        <fieldset>
+          <input onchange="setTheme(this.value)" type="radio" id="light" name="theme-select" value="/css/themes/light.css" style="display: none" checked>
+          <label for="light">🌛</label>
+          <input onchange="setTheme(this.value)" type="radio" id="dark" name="theme-select" value="/css/themes/dark.css" style="display: none">
+          <label for="dark">🌞</label>
+        </fieldseet>
       </div>
     </header>
 
