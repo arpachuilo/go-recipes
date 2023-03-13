@@ -160,11 +160,10 @@ func (self App) SendLink() registrable.Registration {
 				}
 
 				// read user by email
-				userQuery := models.Users(
-					models.UserWhere.Email.EQ(null.StringFrom(email)),
-				)
-
-				user, err := userQuery.One(ctx, tx)
+				userQuery := "select * from users where email like ?"
+				row := tx.QueryRowContext(ctx, userQuery, email)
+				user := models.User{}
+				err = row.Scan(&user)
 				if err != nil {
 					return err
 				}
