@@ -128,9 +128,9 @@ func (self App) ServeLogin() registrable.Registration {
 }
 
 type MagicLinkTemplate struct {
-	URL    template.URL
-	Expiry string
-	Code   string
+	URL              template.URL
+	Expiry           string
+	VerificationCode string
 }
 
 func (self App) SendLink() registrable.Registration {
@@ -194,9 +194,9 @@ func (self App) SendLink() registrable.Registration {
 				}
 
 				data := MagicLinkTemplate{
-					URL:    template.URL(fmt.Sprintf("%v/verify-link?verification_code=%v", self.magicLinkHost, verificationCode)),
-					Expiry: fmt.Sprintf("%s", self.Auth.verificationExpiresAfter),
-					Code:   verificationCode.String(),
+					URL:              template.URL(fmt.Sprintf("%v/verify-link?verification_code=%v", self.magicLinkHost, verificationCode)),
+					Expiry:           fmt.Sprintf("%s", self.Auth.verificationExpiresAfter),
+					VerificationCode: verificationCode.String(),
 				}
 
 				var body bytes.Buffer
