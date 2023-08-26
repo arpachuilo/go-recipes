@@ -2,6 +2,12 @@
 <h1>Magic Link Sent</h1>
 
 <p>
-  A login link was sent to your email. You might have to check your spam folder.
+  A login link was sent to your email. You might have to check your spam folder. You can also enter the code from the email below instead.
 </p>
+
+<form action="/verify-link" method="GET">
+  <label for="verification_code">Code</label>
+  <input name="verification_code" id="verification_code" value="" />
+  <button>Submit</button>
+</form>
 {{ end }}

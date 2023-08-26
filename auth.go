@@ -16,6 +16,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type AuthConfig struct {
@@ -129,6 +130,7 @@ func (self App) ServeLogin() registrable.Registration {
 type MagicLinkTemplate struct {
 	URL    template.URL
 	Expiry string
+	Code   string
 }
 
 func (self App) SendLink() registrable.Registration {
@@ -160,10 +162,15 @@ func (self App) SendLink() registrable.Registration {
 				}
 
 				// read user by email
-				userQuery := "select * from users where email like ?"
-				row := tx.QueryRowContext(ctx, userQuery, email)
-				user := models.User{}
-				err = row.Scan(&user)
+				emailNoCaseQuery := qm.Where(
+					"\"email\" = ? collate nocase",
+					null.StringFrom(email))
+
+				userQuery := models.Users(
+					emailNoCaseQuery,
+				)
+
+				user, err := userQuery.One(ctx, tx)
 				if err != nil {
 					return err
 				}
@@ -189,6 +196,7 @@ func (self App) SendLink() registrable.Registration {
 				data := MagicLinkTemplate{
 					URL:    template.URL(fmt.Sprintf("%v/verify-link?verification_code=%v", self.magicLinkHost, verificationCode)),
 					Expiry: fmt.Sprintf("%s", self.Auth.verificationExpiresAfter),
+					Code:   verificationCode.String(),
 				}
 
 				var body bytes.Buffer
@@ -196,7 +204,7 @@ func (self App) SendLink() registrable.Registration {
 					return err
 				}
 
-				return self.Mailer.Send("Magic Link for Recipes DB", body.String(), email)
+				return self.Mailer.Send("Magic Link for Culinary Hub", body.String(), email)
 			}()
 
 			if err != nil {
