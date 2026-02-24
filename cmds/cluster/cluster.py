@@ -2,27 +2,37 @@ import sqlite3
 import sys
 import re
 import os
+import time
 
 ### Reading Data
+start = time.time()
 # open db
 db = sys.argv[1]
 con = sqlite3.connect(db)
 cur = con.cursor()
 
 # read recipes
+limit = 50
 cur.execute(
     """
     select r.id, r.title, t.tag, i.ingredient
-    from recipes r
+    from (
+        select *
+        from recipes
+        limit ?
+    ) r
     inner join ingredients i on r.id = i.recipeid
     left join tags t on r.id = t.recipeid
-    """
+    """,
+    [limit],
 )
 
 rows = cur.fetchall()
 cur.close()
+print("Data Load: ", time.time() - start)
 
 ### Data Cleanup
+start = time.time()
 from nltk import pos_tag
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
@@ -83,7 +93,10 @@ for [id, title, tag, ingredient] in rows:
         ),
     }
 
+print("Cleanup: ", time.time() - start)
+
 ### Clustering
+start = time.time()
 from sklearn.cluster import KMeans
 import numpy as np
 import operator
@@ -108,7 +121,10 @@ clusters = [
     for pair in zip(kmeans.labels_, results.items())
 ]
 
+print("Clustering: ", time.time() - start)
+
 ### Graph Generation
+start = time.time()
 import networkx as nx
 from networkx.algorithms import community
 
@@ -147,123 +163,123 @@ for (i, j), w in edges.items():
 # calc communities
 communities = community.greedy_modularity_communities(g)
 
+print("Graph Generation: ", time.time() - start)
 
 ### Visualization
-# https://melaniewalsh.github.io/Intro-Cultural-Analytics/06-Network-Analysis/00-Network-Analysis.html
-from bokeh.transform import linear_cmap
-from bokeh.io import output_file, save, show, curdoc
-from bokeh.themes import built_in_themes
-from bokeh.models import (
-    Range1d,
-    Circle,
-    HoverTool,
-    MultiLine,
-    LabelSet,
-    ColumnDataSource,
-    NodesAndLinkedEdges,
-)
-from bokeh.plotting import figure, column
-from bokeh.plotting import from_networkx
-from bokeh.palettes import Viridis8
-
-# title
-output_file(sys.argv[3])
-curdoc().theme = "light_minimal"
-title = "Recipes Visualization"
-
-# Create a plot — set dimensions, toolbar, and title
-plot = figure(
-    tools="pan,wheel_zoom,save,reset,hover",
-    active_scroll="wheel_zoom",
-    x_range=Range1d(-10.1, 10.1),
-    y_range=Range1d(-10.1, 10.1),
-    title=title,
-)
-
-# community based coloring
-# Create empty dictionaries
-modularity_class = {}
-modularity_color = {}
-# Loop through each community in the network
-for community_number, community in enumerate(communities):
-    # For each member of the community, add their community number and a distinct color
-    for name in community:
-        modularity_class[name] = community_number
-        modularity_color[name] = Viridis8[community_number]
-
-nx.set_node_attributes(g, modularity_class, "modularity_class")
-nx.set_node_attributes(g, modularity_color, "modularity_color")
-
-# Create a network graph object with spring layout
-# https://networkx.github.io/documentation/networkx-1.9/reference/generated/networkx.drawing.layout.spring_layout.html
-network_graph = from_networkx(g, nx.spring_layout, scale=10, center=(0, 0))
-
-# settings
-size_by = "NumKeyWords"
-
-# color_by = "modularity_color"
-node_color_by = linear_cmap("Cluster", Viridis8, 0, num_clusters)
-
-edge_color_by = "black"
-edge_opacity_by = "weight"
+start = time.time()
+from PIL import Image, ImageFont, ImageDraw
 
 
-node_highlight_color = "white"
-edge_highlight_color = "black"
+def draw_text(img, text, x, y, size=30, face="Regular", color=(230, 230, 230)):
+    """Helper to draw text labels using PIL."""
+    # This font path assumes you're using a Mac with Open Sans installed.
+    fnt = ImageFont.truetype(f"~/Library/Fonts/OpenSans-{face}.ttf", size)
+    d = ImageDraw.Draw(img)
+    bbox = d.textbbox((x, y), text, fnt)
+    d.text((bbox[0], bbox[1]), text, font=fnt, fill=color)
+    return img
 
-# Set node size and color
-network_graph.node_renderer.glyph = Circle(
-    size=size_by,
-    fill_color=node_color_by,
-)
 
-# Set node highlight colors
-network_graph.node_renderer.hover_glyph = Circle(
-    size=size_by, fill_color=node_highlight_color, line_width=2
-)
-network_graph.node_renderer.selection_glyph = Circle(
-    size=size_by, fill_color=node_highlight_color, line_width=2
-)
+def tile_images(images):
+    # Tile the three images side by side
+    widths, heights = zip(*(i.size for i in images))
+    width = sum(widths)
+    height = max(heights)
+    output = Image.new("RGB", (width, height), (26, 24, 38))
+    x_offset = 0
+    for im in images:
+        output.paste(im, (x_offset, 0))
+        x_offset += im.size[0]
 
-# Set edge opacity and width
-network_graph.edge_renderer.glyph = MultiLine(
-    line_alpha=edge_opacity_by, line_color=edge_color_by, line_width=1
-)
+    return output
 
-# Set edge highlight colors
-network_graph.edge_renderer.selection_glyph = MultiLine(
-    line_color=edge_highlight_color, line_width=2
-)
-network_graph.edge_renderer.hover_glyph = MultiLine(
-    line_color=edge_highlight_color, line_width=2
-)
 
-# Highlight nodes and edges
-network_graph.selection_policy = NodesAndLinkedEdges()
-network_graph.inspection_policy = NodesAndLinkedEdges()
+### Datashader
+import datashader as ds
+import datashader.transfer_functions as tf
+from datashader.layout import random_layout, circular_layout, forceatlas2_layout
+from datashader.bundling import connect_edges, hammer_bundle
+import pandas as pd
+from itertools import chain
 
-# Add network graph to the plot
-plot.renderers.append(network_graph)
+cvsopts = dict(plot_height=800, plot_width=800)
 
-x, y = zip(*network_graph.layout_provider.graph_layout.values())
-source = ColumnDataSource(
-    {"x": x, "y": y, "name": [node_labels[i] for i in range(len(x))]}
-)
 
-labels = LabelSet(
-    x="x",
-    y="y",
-    text="name",
-    source=source,
-    background_fill_color="white",
-    text_font_size="10px",
-    background_fill_alpha=0.7,
-    text_align="center",
-)
-plot.renderers.append(labels)
+def nodesplot(nodes, name=None, canvas=None, cat=None):
+    canvas = ds.Canvas(**cvsopts) if canvas is None else canvas
+    aggregator = None if cat is None else ds.count_cat(cat)
+    agg = canvas.points(nodes, "x", "y", aggregator)
+    return tf.spread(tf.shade(agg, cmap=["#00FF00"]), px=3, name=name)
 
-# setup tooltip
-toolips = """
+
+def edgesplot(edges, name=None, canvas=None):
+    canvas = ds.Canvas(**cvsopts) if canvas is None else canvas
+    return tf.shade(canvas.line(edges, "x", "y", agg=ds.count()), name=name)
+
+
+def graphplot(nodes, edges, name="", canvas=None, cat=None):
+    if canvas is None:
+        xr = nodes.x.min(), nodes.x.max()
+        yr = nodes.y.min(), nodes.y.max()
+        canvas = ds.Canvas(x_range=xr, y_range=yr, **cvsopts)
+
+    np = nodesplot(nodes, name + " nodes", canvas, cat)
+    ep = edgesplot(edges, name + " edges", canvas)
+    return tf.stack(ep, np, how="over", name=name)
+
+
+def nx_layout(graph):
+    layout = nx.spring_layout(graph)
+    data = [[node] + layout[node].tolist() for node in graph.nodes]
+
+    nodes = pd.DataFrame(data, columns=["id", "x", "y"])
+    nodes.set_index("id", inplace=True)
+
+    edges = pd.DataFrame(list(graph.edges), columns=["source", "target"])
+    return nodes, edges
+
+
+def nx_plot(graph, name=""):
+    # print(graph.name, len(graph.edges))
+    nodes, edges = nx_layout(graph)
+
+    direct = connect_edges(nodes, edges)
+    bundled_bw005 = hammer_bundle(nodes, edges)
+    bundled_bw030 = hammer_bundle(nodes, edges, initial_bandwidth=0.30)
+
+    return [
+        graphplot(nodes, direct, graph.name),
+        graphplot(nodes, bundled_bw005, "Bundled bw=0.05"),
+        graphplot(nodes, bundled_bw030, "Bundled bw=0.30"),
+    ]
+
+
+plots = nx_plot(g)
+
+imgs = [
+    draw_text(tf.set_background(plot, (26, 24, 38)).to_pil(), plot.name, 15, 0)
+    for plot in plots
+]
+output = tile_images(imgs)
+output.save("tmp.png")
+
+
+from pixcat import Image
+
+Image("tmp.png").show()
+
+print("Rendering: ", time.time() - start)
+
+import holoviews as hv
+from holoviews import opts
+from holoviews.plotting.util import process_cmap
+from holoviews.operation.datashader import datashade, bundle_graph
+from bokeh.models import HoverTool
+
+hv.extension("bokeh")
+hv.renderer("bokeh").theme = "dark_minimal"
+
+tooltips = """
     <div style="font-family: Helvetica;
                 border: 1px solid black;
                 background-color: white;
@@ -276,16 +292,34 @@ toolips = """
     <span style="font-size: 16px;"><b>Title:</b> @Title</span><br>
     <span style="font-size: 16px;"><b>Cluster:</b> @Cluster</span><br>
     <span style="font-size: 16px;"><b>Keywords:</b> @KeyWords</span><br>
+    <img  style="max-width: 200px;" src="http://localhost/images/recipe/@ID" />
     </div>
     """
 
+hover = HoverTool(tooltips=tooltips)
+kwargs = dict(width=800, height=800, xaxis=None, yaxis=None)
+nodes_kwargs = {**kwargs, **dict(size=15)}
+opts.defaults(opts.Nodes(**nodes_kwargs), opts.Graph(**kwargs))
 
-hover = plot.select_one(HoverTool)
-hover.show_arrow = False
-hover.tooltips = toolips
+graph = hv.Graph.from_networkx(g, nx.layout.fruchterman_reingold_layout)
+graph.opts(
+    cmap=process_cmap("Viridis", provider="bokeh"),
+    width=800,
+    height=800,
+    edge_line_width=1,
+    node_color="Cluster",
+    tools=[hover],
+    active_tools=["wheel_zoom"],
+)
 
-# layout
-column(plot, sizing_mode="stretch_both")
+graph = bundle_graph(graph)
+labels = hv.Labels(graph.nodes, ["x", "y"], "Label")
+graph = (
+    (
+        datashade(graph, normalization="linear", width=800, height=800) * graph.nodes
+    ).opts(opts.Nodes(color="Cluster", cmap=colors))
+    * graph.opts(edge_alpha=0).select(circle="Cluster").opts(node_color="Cluster")
+    * labels.opts(text_font_size="8pt", text_color="grey")
+)
 
-# show(plot)
-save(plot)
+hv.save(graph, "out.html")
