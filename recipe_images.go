@@ -48,7 +48,6 @@ func (self App) ServeRecipeImages() registrable.Registration {
 			c.Response().Header().Set("ETag", self.ImageETags.Add(recipe.ID.Int64, recipe.Image.Bytes, false))
 			contentType := http.DetectContentType(recipe.Image.Bytes)
 			return c.Blob(http.StatusOK, contentType, recipe.Image.Bytes)
-
 		},
 	}
 }
